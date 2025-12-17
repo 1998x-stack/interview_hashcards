@@ -24,7 +24,7 @@ hashcards is built on four core principles:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/hashcards.git
+git clone https://github.com/1998x-stack/hashcards.git
 cd hashcards
 
 # Install dependencies
@@ -156,7 +156,7 @@ git add .
 git commit -m "Added organic chemistry deck"
 
 # Share on GitHub
-git remote add origin https://github.com/yourusername/my-cards.git
+git remote add origin https://github.com/1998x-stack/my-cards.git
 git push -u origin main
 ```
 

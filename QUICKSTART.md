@@ -4,7 +4,7 @@
 
 ```bash
 # 1. Clone or download the project
-git clone https://github.com/yourusername/hashcards.git
+git clone https://github.com/1998x-stack/hashcards.git
 cd hashcards
 
 # 2. Install dependencies
@@ -137,7 +137,7 @@ git commit -m "Initial card collection"
 
 ```bash
 # Create a repo on GitHub, then:
-git remote add origin https://github.com/yourusername/my-cards.git
+git remote add origin https://github.com/1998x-stack/my-cards.git
 git push -u origin main
 ```
 

@@ -15,7 +15,7 @@ setup(
     description="Local-first spaced repetition learning with Markdown",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/hashcards",
+    url="https://github.com/1998x-stack/hashcards",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
