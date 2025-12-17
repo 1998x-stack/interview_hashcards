@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Cards - hashcards{% endblock %}
+
+{% block content %}
+<h1>Browse Cards</h1>
+{% if deck_name %}
+<p style="color: #666; margin-bottom: 1rem;">Deck: <strong>{{ deck_name }}</strong></p>
+{% endif %}
+
+<div style="margin-bottom: 1.5rem;">
+    <strong>{{ cards | length }}</strong> card{% if cards | length != 1 %}s{% endif %}
+</div>
+
+{% for item in cards %}
+<div class="card">
+    {% set card = item.card %}
+    {% set schedule = item.schedule %}
+    
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+        <div>
+            <strong>{{ card.deck_name }}</strong>
+            <span style="color: #666; font-size: 0.875rem; margin-left: 0.5rem;">
+                {% if card.card_type.value == 'qa' %}Q&A{% else %}Cloze{% endif %}
+            </span>
+        </div>
+        {% if schedule %}
+        <div style="text-align: right; font-size: 0.875rem; color: #666;">
+            <div>Reviews: {{ schedule.reps }}</div>
+            {% if schedule.state == 2 %}
+            <div>Interval: {{ schedule.scheduled_days }}d</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if card.card_type.value == 'qa' %}
+        <div style="margin-bottom: 0.5rem;">
+            <strong style="color: var(--primary);">Q:</strong> {{ card.content.question }}
+        </div>
+        <div>
+            <strong style="color: var(--success);">A:</strong> {{ card.content.answer }}
+        </div>
+    {% else %}
+        <div>
+            <strong style="color: var(--primary);">C:</strong>
+            {% set text = card.content.text %}
+            {% for deletion in card.content.deletions %}
+                {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
+            {% endfor %}
+            {{ text | safe }}
+        </div>
+    {% endif %}
+    
+    {% if schedule %}
+    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.875rem; color: #666;">
+        Due: {{ schedule.due.strftime('%Y-%m-%d %H:%M') }}
+        | Difficulty: {{ "%.1f" | format(schedule.difficulty) }}
+        | Stability: {{ "%.1f" | format(schedule.stability) }}d
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if cards | length == 0 %}
+<div class="card" style="text-align: center; color: #666;">
+    <p>No cards found.</p>
+    <p style="margin-top: 0.5rem;">Create some <code>.md</code> files in your cards directory!</p>
+</div>
+{% endif %}
+{% endblock %}

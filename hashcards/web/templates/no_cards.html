@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}No Cards Due - hashcards{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center;">
+    <h1 style="font-size: 3rem; margin-bottom: 1rem;">✨</h1>
+    <h2>All Done!</h2>
+    <p style="margin-top: 1rem; color: #666;">
+        {% if deck_name %}
+        No cards due in <strong>{{ deck_name }}</strong> deck.
+        {% else %}
+        No cards due for review right now.
+        {% endif %}
+    </p>
+    <p style="margin-top: 0.5rem; color: #666;">
+        Come back later, or browse your collection.
+    </p>
+    
+    <div class="buttons" style="margin-top: 2rem;">
+        <a href="/" class="btn">Back to Home</a>
+        <a href="/browse" class="btn">Browse Cards</a>
+    </div>
+</div>
+{% endblock %}

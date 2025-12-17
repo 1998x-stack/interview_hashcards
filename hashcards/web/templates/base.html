@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}hashcards{% endblock %}</title>
+    <style>
+        /* Minimalist design - focus on content */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #fafafa;
+            --fg: #333;
+            --border: #ddd;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --error: #dc2626;
+            --card-bg: #fff;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --fg: #e5e5e5;
+                --border: #404040;
+                --card-bg: #262626;
+            }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        nav {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        nav a {
+            color: var(--primary);
+            text-decoration: none;
+            margin-right: 1.5rem;
+            font-weight: 500;
+        }
+        
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-content {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            min-height: 100px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button, .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--fg);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        button:hover, .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active, .btn:active {
+            transform: translateY(0);
+        }
+        
+        button.again { border-color: var(--error); color: var(--error); }
+        button.hard { border-color: var(--warning); color: var(--warning); }
+        button.good { border-color: var(--success); color: var(--success); }
+        button.easy { border-color: var(--primary); color: var(--primary); }
+        
+        button.again:hover { background: var(--error); color: white; }
+        button.hard:hover { background: var(--warning); color: white; }
+        button.good:hover { background: var(--success); color: white; }
+        button.easy:hover { background: var(--primary); color: white; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .cloze-hidden {
+            background: #fef3c7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .cloze-revealed {
+            background: #dcfce7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .keyboard-hint {
+            text-align: center;
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+        
+        code {
+            background: var(--border);
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .deck-list {
+            list-style: none;
+        }
+        
+        .deck-list li {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .deck-list a {
+            color: var(--fg);
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .deck-list a:hover {
+            color: var(--primary);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/study">Study</a>
+        <a href="/browse">Browse</a>
+    </nav>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only handle if not in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            {% block keyboard_shortcuts %}{% endblock %}
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
