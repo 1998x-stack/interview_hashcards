@@ -1,5 +1,7 @@
 ## 核心设计理念：数据主权与工具透明性
 
+> https://borretti.me/article/hashcards-plain-text-spaced-repetition
+
 ### 1. **"数据即代码"的哲学**
 
 hashcards最激进的设计决策是**放弃传统数据库，改用纯文本Markdown文件**。这不仅是技术选择，更是一种价值宣言：
