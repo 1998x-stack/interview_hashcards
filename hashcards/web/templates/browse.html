@@ -3,13 +3,20 @@
 {% block title %}Browse Cards - hashcards{% endblock %}
 
 {% block content %}
-<h1>Browse Cards</h1>
-{% if deck_name %}
-<p style="color: #666; margin-bottom: 1rem;">Deck: <strong>{{ deck_name }}</strong></p>
-{% endif %}
+<div style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖 Browse Cards</h1>
+    {% if deck_name %}
+    <p style="color: var(--fg-muted); font-size: 1.05rem;">
+        Deck: <strong style="color: var(--accent);">{{ deck_name }}</strong>
+    </p>
+    {% endif %}
+</div>
 
-<div style="margin-bottom: 1.5rem;">
-    <strong>{{ cards | length }}</strong> card{% if cards | length != 1 %}s{% endif %}
+<div style="margin-bottom: 2rem; padding: 1rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: inline-block;">
+    <span style="font-weight: 700; font-size: 1.25rem; color: var(--accent);">{{ cards | length }}</span>
+    <span style="color: var(--fg-secondary); font-weight: 600; margin-left: 0.5rem;">
+        card{% if cards | length != 1 %}s{% endif %}
+    </span>
 </div>
 
 {% for item in cards %}
@@ -17,55 +24,60 @@
     {% set card = item.card %}
     {% set schedule = item.schedule %}
     
-    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
         <div>
-            <strong>{{ card.deck_name }}</strong>
-            <span style="color: #666; font-size: 0.875rem; margin-left: 0.5rem;">
-                {% if card.card_type.value == 'qa' %}Q&A{% else %}Cloze{% endif %}
+            <span style="font-weight: 700; font-size: 1.05rem; color: var(--accent);">{{ card.deck_name }}</span>
+            <span style="background: rgba(59, 130, 246, 0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.8rem; margin-left: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
+                {% if card.card_type.value == 'qa' %}Q&A{% else %}CLOZE{% endif %}
             </span>
         </div>
         {% if schedule %}
-        <div style="text-align: right; font-size: 0.875rem; color: #666;">
-            <div>Reviews: {{ schedule.reps }}</div>
+        <div style="text-align: right; font-size: 0.85rem; color: var(--fg-muted); line-height: 1.6;">
+            <div style="font-weight: 600;">Reviews: <span style="color: var(--accent);">{{ schedule.reps }}</span></div>
             {% if schedule.state == 2 %}
-            <div>Interval: {{ schedule.scheduled_days }}d</div>
+            <div style="font-weight: 600;">Interval: <span style="color: var(--success);">{{ schedule.scheduled_days }}d</span></div>
             {% endif %}
         </div>
         {% endif %}
     </div>
     
     {% if card.card_type.value == 'qa' %}
-        <div style="margin-bottom: 0.5rem;">
-            <strong style="color: var(--primary);">Q:</strong> {{ card.content.question }}
+        <div style="margin-bottom: 1rem;">
+            <div style="color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">QUESTION</div>
+            <div style="font-size: 1.05rem; line-height: 1.7; color: var(--fg-secondary);">{{ card.content.question }}</div>
         </div>
         <div>
-            <strong style="color: var(--success);">A:</strong> {{ card.content.answer }}
+            <div style="color: var(--success); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">ANSWER</div>
+            <div style="font-size: 1.05rem; line-height: 1.7; color: var(--fg-secondary);">{{ card.content.answer }}</div>
         </div>
     {% else %}
         <div>
-            <strong style="color: var(--primary);">C:</strong>
-            {% set text = card.content.text %}
-            {% for deletion in card.content.deletions %}
-                {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
-            {% endfor %}
-            {{ text | safe }}
+            <div style="color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">CLOZE</div>
+            <div style="font-size: 1.05rem; line-height: 1.8;">
+                {% set text = card.content.text %}
+                {% for deletion in card.content.deletions %}
+                    {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
+                {% endfor %}
+                {{ text | safe }}
+            </div>
         </div>
     {% endif %}
     
     {% if schedule %}
-    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.875rem; color: #666;">
-        Due: {{ schedule.due.strftime('%Y-%m-%d %H:%M') }}
-        | Difficulty: {{ "%.1f" | format(schedule.difficulty) }}
-        | Stability: {{ "%.1f" | format(schedule.stability) }}d
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--fg-muted); display: flex; gap: 1.5rem; flex-wrap: wrap;">
+        <span style="font-weight: 600;">Due: <span style="color: var(--fg-secondary);">{{ schedule.due.strftime('%Y-%m-%d %H:%M') }}</span></span>
+        <span style="font-weight: 600;">Difficulty: <span style="color: var(--warning);">{{ "%.1f" | format(schedule.difficulty) }}</span></span>
+        <span style="font-weight: 600;">Stability: <span style="color: var(--success);">{{ "%.1f" | format(schedule.stability) }}d</span></span>
     </div>
     {% endif %}
 </div>
 {% endfor %}
 
 {% if cards | length == 0 %}
-<div class="card" style="text-align: center; color: #666;">
-    <p>No cards found.</p>
-    <p style="margin-top: 0.5rem;">Create some <code>.md</code> files in your cards directory!</p>
+<div class="card" style="text-align: center; padding: 3rem;">
+    <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+    <p style="color: var(--fg-secondary); font-size: 1.15rem; margin-bottom: 0.75rem; font-weight: 600;">No cards found</p>
+    <p style="color: var(--fg-muted);">Create some <code>.md</code> files in your cards directory to get started!</p>
 </div>
 {% endif %}
 {% endblock %}

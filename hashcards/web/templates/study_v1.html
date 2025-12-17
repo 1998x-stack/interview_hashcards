@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Study - hashcards{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 1rem; color: #666;">
+    <strong>{{ card.deck_name }}</strong>
+    {% if schedule %}
+    | Reviews: {{ schedule.reps }}
+    {% if schedule.lapses > 0 %}
+    | Lapses: {{ schedule.lapses }}
+    {% endif %}
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-content" id="card-content">
+        {% if card.card_type.value == 'qa' %}
+            {# Question-Answer card #}
+            <div id="question-side">
+                <strong style="color: var(--primary);">Q:</strong>
+                <div style="margin-top: 0.5rem;">{{ card.content.question }}</div>
+            </div>
+            <div id="answer-side" style="display: none;">
+                <strong style="color: var(--success);">A:</strong>
+                <div style="margin-top: 0.5rem;">{{ card.content.answer }}</div>
+            </div>
+        {% else %}
+            {# Cloze card #}
+            <div id="cloze-hidden">
+                {{ card.content.text | replace('[', '<span class="cloze-hidden">[...') | replace(']', ']</span>') | safe }}
+            </div>
+            <div id="cloze-revealed" style="display: none;">
+                {% set text = card.content.text %}
+                {% for deletion in card.content.deletions %}
+                    {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
+                {% endfor %}
+                {{ text | safe }}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div id="show-answer-btn" class="buttons">
+        <button onclick="showAnswer()" style="background: var(--primary); color: white; border-color: var(--primary);">
+            Show Answer (Space)
+        </button>
+    </div>
+    
+    <form method="POST" action="/review" id="review-form" style="display: none;">
+        <input type="hidden" name="card_hash" value="{{ card_hash }}">
+        <input type="hidden" name="deck_name" value="{{ deck_name or '' }}">
+        <input type="hidden" name="rating" id="rating-input">
+        
+        <div class="buttons">
+            <button type="button" class="again" onclick="submitReview(1)">
+                Again (1)<br>
+                <small style="font-size: 0.75rem;">< 10m</small>
+            </button>
+            <button type="button" class="hard" onclick="submitReview(2)">
+                Hard (2)<br>
+                <small style="font-size: 0.75rem;">
+                    {% if schedule.scheduled_days < 1 %}< 1d{% else %}{{ (schedule.scheduled_days * 0.8) | int }}d{% endif %}
+                </small>
+            </button>
+            <button type="button" class="good" onclick="submitReview(3)">
+                Good (3)<br>
+                <small style="font-size: 0.75rem;">
+                    {% if schedule.scheduled_days < 1 %}1d{% else %}{{ schedule.scheduled_days }}d{% endif %}
+                </small>
+            </button>
+            <button type="button" class="easy" onclick="submitReview(4)">
+                Easy (4)<br>
+                <small style="font-size: 0.75rem;">
+                    {% if schedule.scheduled_days < 1 %}2d{% else %}{{ (schedule.scheduled_days * 1.3) | int }}d{% endif %}
+                </small>
+            </button>
+        </div>
+    </form>
+    
+    <div class="keyboard-hint">
+        Press <code>Space</code> to reveal, then <code>1</code>/<code>2</code>/<code>3</code>/<code>4</code> to rate
+    </div>
+</div>
+
+<script>
+    let answerShown = false;
+    
+    function showAnswer() {
+        {% if card.card_type.value == 'qa' %}
+            document.getElementById('answer-side').style.display = 'block';
+        {% else %}
+            document.getElementById('cloze-hidden').style.display = 'none';
+            document.getElementById('cloze-revealed').style.display = 'block';
+        {% endif %}
+        
+        document.getElementById('show-answer-btn').style.display = 'none';
+        document.getElementById('review-form').style.display = 'block';
+        answerShown = true;
+    }
+    
+    function submitReview(rating) {
+        document.getElementById('rating-input').value = rating;
+        document.getElementById('review-form').submit();
+    }
+</script>
+{% endblock %}
+
+{% block keyboard_shortcuts %}
+    if (e.code === 'Space') {
+        e.preventDefault();
+        if (!answerShown) {
+            showAnswer();
+        }
+    } else if (answerShown && ['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
+        e.preventDefault();
+        const rating = parseInt(e.code.slice(-1));
+        submitReview(rating);
+    }
+{% endblock %}

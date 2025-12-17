@@ -1,0 +1,128 @@
+
+Q: Transformer 模型的核心创新是什么？
+A: Transformer 是一种**完全基于注意力机制**的序列建模架构，**不使用循环神经网络或卷积网络**。
+Q: Transformer 主要解决了传统 RNN 的什么问题？
+A: 解决了 **计算无法并行** 和 **长序列依赖路径过长** 的问题。
+C: Transformer 完全依赖 [attention] 机制，而不是 [recurrence] 或 [convolution]。
+
+Q: 传统序列到序列模型主要依赖哪些结构？
+A: 主要依赖 **RNN / LSTM / GRU**，并辅以注意力机制。
+Q: 为什么卷积模型仍然难以建模长距离依赖？
+A: 因为需要 **多层堆叠** 才能连接远距离位置，路径较长。
+C: 在 ConvS2S 中，任意两位置的依赖路径长度随 [distance] 增长。
+
+Q: Transformer 的整体架构属于哪一类模型？
+A: **Encoder–Decoder（编码器–解码器）架构**。
+Q: Transformer 的编码器和解码器由什么组成？
+A: 由 **多层堆叠的自注意力层和前馈网络层** 组成。
+C: Transformer 采用标准的 [encoder-decoder] 架构。
+
+Q: Transformer 编码器的每一层包含哪两个子层？
+A: **多头自注意力层** 和 **逐位置前馈网络层**。
+Q: Transformer 解码器比编码器多了哪一个子层？
+A: **编码器–解码器注意力层**。
+Q: 为什么解码器中的自注意力需要 mask？
+A: 为了防止模型看到 **未来位置的信息**，保持自回归特性。
+C: 解码器自注意力通过 [masking] 防止信息泄露。
+
+Q: 注意力机制的基本输入和输出是什么？
+A: 输入是 **Query、Key、Value**，输出是 **加权后的 Value**。
+Q: 注意力权重是如何计算的？
+A: 通过 **Query 与 Key 的相似度** 计算得到。
+C: Attention 将 [query] 与 [key-value] 对映射为输出。
+
+Q: Scaled Dot-Product Attention 的核心计算公式是什么？
+A:
+Attention(Q, K, V) = softmax(QKᵀ / √dk) · V
+Q: 为什么要除以 √dk？
+A: 防止 **点积值过大**，避免 softmax 梯度消失。
+C: 点积注意力通过除以 [√dk] 进行数值缩放。
+
+Q: 多头注意力的核心思想是什么？
+A: 在 **不同子空间中并行执行多个注意力头**。
+Q: 多头注意力相比单头注意力的优势是什么？
+A: 可以同时关注 **不同位置、不同语义关系**。
+Q: Transformer Base 使用了多少个注意力头？
+A: **8 个注意力头**。
+C: Multi-Head Attention 允许模型关注不同的 [representation subspaces]。
+
+Q: Transformer 中注意力机制主要用在哪三种场景？
+A:
+1. 编码器自注意力
+2. 解码器自注意力
+3. 编码器–解码器注意力
+Q: 编码器–解码器注意力的作用是什么？
+A: 让解码器在生成时关注 **整个输入序列**。
+C: Encoder-Decoder Attention 连接 [encoder outputs] 与 [decoder queries]。
+
+Q: Transformer 中的前馈网络是如何应用的？
+A: 对 **序列中每个位置独立、共享参数** 地应用。
+Q: 前馈网络包含哪些操作？
+A: 两个线性变换，中间使用 **ReLU 激活函数**。
+C: FFN 在每个 [position] 上独立运行，但参数 [shared]。
+
+Q: Transformer 是否共享 embedding 权重？
+A: 是的，**输入 embedding 与输出 softmax 权重共享**。
+Q: 为什么 embedding 需要乘以 √dmodel？
+A: 保持 embedding 与位置编码的 **数值尺度一致**。
+C: Embedding 权重在输入和输出中是 [shared] 的。
+
+Q: 为什么 Transformer 需要位置编码？
+A: 因为模型 **没有循环和卷积结构**，无法感知顺序。
+Q: Transformer 使用了哪种位置编码？
+A: **正弦与余弦函数的固定位置编码**。
+Q: 正弦位置编码的优势是什么？
+A: 能够 **外推到更长序列长度**。
+C: Positional Encoding 使用 [sin] 和 [cos] 函数。
+
+Q: 自注意力在并行性上的优势是什么？
+A: 所有位置可以 **同时计算**，不依赖前一步。
+Q: 自注意力对长距离依赖的路径长度是多少？
+A: **常数级 O(1)**。
+C: Self-Attention 的最大路径长度是 [O(1)]。
+
+Q: Transformer 在机器翻译中如何组织 batch？
+A: 按 **相似长度句子** 分组，减少 padding。
+C: Batching 根据 [sequence length] 进行分组。
+
+Q: Transformer Base 模型训练使用了什么硬件？
+A: **8 张 NVIDIA P100 GPU**。
+Q: Base 模型训练大约需要多久？
+A: **约 12 小时**。
+C: Transformer 的训练高度 [parallelizable]。
+
+Q: Transformer 使用了哪种优化器？
+A: **Adam 优化器**。
+Q: 学习率调度的关键特征是什么？
+A: **Warmup + 反平方根衰减**。
+C: Learning rate 在 warmup 阶段 [linearly increases]。
+
+Q: Transformer 使用了哪些正则化手段？
+A: **Dropout、Label Smoothing**。
+Q: Label Smoothing 的作用是什么？
+A: 提高泛化能力，减少模型过度自信。
+C: Label smoothing 防止模型预测过于 [confident]。
+
+Q: Transformer 在 WMT14 英德翻译上的 BLEU 分数是多少？
+A: **28.4 BLEU（Transformer Big）**。
+Q: Transformer 相比以往模型的优势是什么？
+A: **更高精度 + 更低训练成本**。
+C: Transformer 在 BLEU 上取得新的 [state-of-the-art]。
+
+Q: 增加模型规模通常会带来什么效果？
+A: **性能提升，但参数量增加**。
+Q: 注意力头数过多会发生什么？
+A: 性能可能 **下降**。
+C: Attention head 数量存在 [trade-off]。
+
+Q: Transformer 是否能泛化到非翻译任务？
+A: 是的，在 **句法分析任务** 上表现优异。
+Q: Transformer 在小数据集上表现如何？
+A: **优于多数 RNN 模型**。
+C: Transformer 展示了良好的 [generalization] 能力。
+
+Q: Transformer 的核心贡献是什么？
+A: 提出了 **完全基于注意力的序列建模范式**。
+Q: Transformer 的长期影响是什么？
+A: 成为 **现代大语言模型（LLM）的基础架构**。
+C: Transformer 奠定了现代 [LLM] 的基础。

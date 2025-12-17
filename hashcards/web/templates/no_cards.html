@@ -3,23 +3,38 @@
 {% block title %}No Cards Due - hashcards{% endblock %}
 
 {% block content %}
-<div class="card" style="text-align: center;">
-    <h1 style="font-size: 3rem; margin-bottom: 1rem;">✨</h1>
-    <h2>All Done!</h2>
-    <p style="margin-top: 1rem; color: #666;">
+<div class="card" style="text-align: center; padding: 4rem 2rem; min-height: 500px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div style="font-size: 5rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite;">✨</div>
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">All Done!</h1>
+    <p style="font-size: 1.15rem; color: var(--fg-secondary); max-width: 500px; margin: 0 auto 0.75rem; line-height: 1.7;">
         {% if deck_name %}
-        No cards due in <strong>{{ deck_name }}</strong> deck.
+        No cards due in the <strong style="color: var(--accent);">{{ deck_name }}</strong> deck right now.
         {% else %}
-        No cards due for review right now.
+        No cards are due for review at the moment.
         {% endif %}
     </p>
-    <p style="margin-top: 0.5rem; color: #666;">
-        Come back later, or browse your collection.
+    <p style="font-size: 1rem; color: var(--fg-muted); margin-bottom: 2.5rem;">
+        Come back later, or explore your collection.
     </p>
     
-    <div class="buttons" style="margin-top: 2rem;">
-        <a href="/" class="btn">Back to Home</a>
-        <a href="/browse" class="btn">Browse Cards</a>
+    <div class="buttons" style="gap: 1.25rem;">
+        <a href="/" class="btn" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border: none; padding: 1rem 2rem; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+            ← Back to Home
+        </a>
+        <a href="/browse" class="btn" style="background: var(--bg-card); border: 2px solid var(--border); padding: 1rem 2rem; font-size: 1.05rem;">
+            Browse Cards →
+        </a>
     </div>
 </div>
+
+<style>
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+</style>
 {% endblock %}

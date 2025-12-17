@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}hashcards - Home{% endblock %}
+
+{% block content %}
+<h1>📚 hashcards</h1>
+<p style="color: #666; margin-bottom: 2rem;">
+    Local-first spaced repetition learning
+</p>
+
+<div class="stats">
+    <div class="stat-box">
+        <div class="stat-number">{{ stats.total_cards }}</div>
+        <div class="stat-label">Total Cards</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ stats.due_cards }}</div>
+        <div class="stat-label">Due Today</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-number">{{ stats.reviews_today }}</div>
+        <div class="stat-label">Reviewed Today</div>
+    </div>
+</div>
+
+{% if stats.due_cards > 0 %}
+<div class="card">
+    <h2>Ready to study?</h2>
+    <p>You have {{ stats.due_cards }} card{% if stats.due_cards != 1 %}s{% endif %} waiting for review.</p>
+    <div class="buttons" style="margin-top: 1rem;">
+        <a href="/study" class="btn" style="background: var(--primary); color: white; border-color: var(--primary);">
+            Start Studying
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <h2>✨ All caught up!</h2>
+    <p>No cards due for review right now. Come back later, or browse your collection.</p>
+</div>
+{% endif %}
+
+<h2 style="margin-top: 2rem;">Your Decks</h2>
+<ul class="deck-list">
+    {% for deck in decks %}
+    <li>
+        <a href="/study/{{ deck.name }}">
+            <span>{{ deck.name }}</span>
+            <span style="color: #666;">{{ deck.count }} cards</span>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+<div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border); color: #666; font-size: 0.875rem;">
+    <p><strong>Tips:</strong></p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>Edit your cards by modifying <code>.md</code> files in your cards directory</li>
+        <li>Cards are identified by content hash - editing a card creates a new one</li>
+        <li>Use Git to track changes and share your card collection</li>
+        <li>Reload cards: <code>GET /api/reload</code></li>
+    </ul>
+</div>
+{% endblock %}
