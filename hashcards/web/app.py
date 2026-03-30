@@ -155,7 +155,20 @@ class HashcardsApp:
                 })
             
             return render_template('browse.html', cards=cards_with_schedule, deck_name=deck_name)
-    
+
+        @self.app.route('/stats')
+        def stats():
+            """Statistics dashboard"""
+            history = self.storage.get_review_history(days=365)
+            deck_stats = self.storage.get_deck_stats()
+            overall = self.storage.get_stats()
+            return render_template(
+                'stats.html',
+                history=history,
+                deck_stats=deck_stats,
+                overall=overall
+            )
+
     def _get_deck_list(self) -> list:
         """Get list of all decks"""
         decks = {}

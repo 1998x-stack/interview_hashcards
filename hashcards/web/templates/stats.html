@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Stats — hashcards{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+    .heat-grid { display: grid; grid-template-columns: repeat(53, 1fr); gap: 2px; }
+    .heat-cell { aspect-ratio: 1; border-radius: 2px; }
+    .heat-0  { background: #e2e8f0; }
+    .heat-1  { background: #c7d2fe; }
+    .heat-2  { background: #818cf8; }
+    .heat-3  { background: #4f46e5; }
+    .heat-4  { background: #312e81; }
+    @media (prefers-color-scheme: dark) {
+        .heat-0 { background: #1e293b; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-8">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Statistics</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Your learning history</p>
+</div>
+
+<!-- Heatmap -->
+<div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Review activity (last 365 days)</h2>
+    <div class="heat-grid" aria-label="Review heatmap">
+        {% for date, count in history.items() %}
+            {% if count == 0 %}{% set level = 0 %}
+            {% elif count <= 2 %}{% set level = 1 %}
+            {% elif count <= 5 %}{% set level = 2 %}
+            {% elif count <= 10 %}{% set level = 3 %}
+            {% else %}{% set level = 4 %}{% endif %}
+            <div class="heat-cell heat-{{ level }}" title="{{ date }}: {{ count }} review{% if count != 1 %}s{% endif %}"></div>
+        {% endfor %}
+    </div>
+    <div class="mt-3 flex items-center gap-2 text-xs text-slate-400">
+        <span>Less</span>
+        <div class="heat-cell heat-0 h-3 w-3"></div>
+        <div class="heat-cell heat-1 h-3 w-3"></div>
+        <div class="heat-cell heat-2 h-3 w-3"></div>
+        <div class="heat-cell heat-3 h-3 w-3"></div>
+        <div class="heat-cell heat-4 h-3 w-3"></div>
+        <span>More</span>
+    </div>
+</div>
+
+<!-- State breakdown chart -->
+<div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Collection by state</h2>
+    <div class="relative h-40">
+        <canvas id="stateChart"></canvas>
+    </div>
+</div>
+
+<!-- Per-deck table -->
+<div class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+        <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Per-deck breakdown</h2>
+    </div>
+    {% if deck_stats %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-slate-100 dark:border-slate-800 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <th class="px-6 py-3">Deck</th>
+                    <th class="px-4 py-3 text-right">Total</th>
+                    <th class="px-4 py-3 text-right">New</th>
+                    <th class="px-4 py-3 text-right">Learning</th>
+                    <th class="px-4 py-3 text-right">Review</th>
+                    <th class="px-4 py-3 text-right">Avg Diff</th>
+                    <th class="px-4 py-3 text-right">Lapse Rate</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                {% for d in deck_stats %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td class="px-6 py-3 font-medium text-slate-700 dark:text-slate-300">{{ d.deck_name }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-400">{{ d.total }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-slate-500">{{ d.new }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-amber-600 dark:text-amber-400">{{ d.learning }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-emerald-600 dark:text-emerald-400">{{ d.review }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-slate-500">{{ d.avg_difficulty }}</td>
+                    <td class="px-4 py-3 text-right tabular-nums text-slate-500">{{ d.lapse_rate }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="px-6 py-8 text-center text-sm text-slate-400">No data yet — start reviewing cards to see stats.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    const states = {{ overall.by_state | tojson }};
+    const labels = ['New', 'Learning', 'Review', 'Relearning'];
+    const keys   = ['NEW', 'LEARNING', 'REVIEW', 'RELEARNING'];
+    const data   = keys.map(k => states[k] || 0);
+    const colors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444'];
+
+    new Chart(document.getElementById('stateChart'), {
+        type: 'bar',
+        data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4 }] },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { precision: 0 } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+})();
+</script>
+{% endblock %}
