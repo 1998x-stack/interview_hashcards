@@ -49,15 +49,17 @@ class HashcardsApp:
         self._register_routes()
     
     def _load_all_cards(self):
-        """Load all cards from Markdown files"""
+        """Load all cards from Markdown files (recursive)"""
         self.cards_cache.clear()
-        
-        for md_file in self.cards_dir.glob("*.md"):
-            cards = CardParser.parse_file(str(md_file))
+
+        for md_file in self.cards_dir.rglob("*.md"):
+            # Deck name = relative path without extension, e.g. "algo/papers/BatchNorm"
+            deck_name = str(md_file.relative_to(self.cards_dir).with_suffix(''))
+            cards = CardParser.parse_file(str(md_file), deck_name=deck_name)
             for card in cards:
                 card_hash = card.get_hash()
                 self.cards_cache[card_hash] = card
-                
+
                 # Initialize schedule if new card
                 if not self.storage.get_schedule(card_hash):
                     schedule = self.scheduler.init_card(card_hash)

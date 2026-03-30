@@ -46,20 +46,22 @@ class CardParser:
     CLOZE_DELETION = re.compile(r'\[([^\]]+)\]')
     
     @classmethod
-    def parse_file(cls, filepath: str) -> List[Card]:
+    def parse_file(cls, filepath: str, deck_name: Optional[str] = None) -> List[Card]:
         """
         Parse a Markdown file and extract all cards
-        
+
         Args:
             filepath: Path to the .md file
-            
+            deck_name: Override deck name (default: derived from filename)
+
         Returns:
             List of Card objects
         """
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-        
-        deck_name = cls._extract_deck_name(filepath)
+
+        if deck_name is None:
+            deck_name = cls._extract_deck_name(filepath)
         return cls.parse_content(content, deck_name)
     
     @classmethod
