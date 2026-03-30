@@ -6,6 +6,7 @@ Minimalist interface focused on the review experience
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from pathlib import Path
 from typing import Optional
+from datetime import date
 import os
 
 from ..parser import CardParser, Card
@@ -168,6 +169,57 @@ class HashcardsApp:
                 deck_stats=deck_stats,
                 overall=overall
             )
+
+        @self.app.route('/generate', methods=['GET', 'POST'])
+        def generate():
+            """AI card generation — input form and preview"""
+            error = None
+            preview = None
+            deck_name = None
+
+            if request.method == 'POST':
+                source_text = request.form.get('source_text', '').strip()
+                deck_name = request.form.get('deck_name', '').strip() or f"generated_{date.today().isoformat()}"
+
+                api_key = os.environ.get('DASHSCOPE_API_KEY')
+                if not api_key:
+                    error = "DASHSCOPE_API_KEY environment variable is not set."
+                elif not source_text:
+                    error = "Please paste some text to generate cards from."
+                else:
+                    try:
+                        from ..generator import CardGenerator
+                        gen = CardGenerator(api_key=api_key)
+                        existing_decks = list({c.deck_name for c in self.cards_cache.values()})
+                        preview = gen.generate(source_text, existing_decks=existing_decks)
+                        if not preview:
+                            error = "The model returned no cards. Try with more detailed text."
+                    except Exception as exc:
+                        error = f"Generation failed: {exc}"
+
+            return render_template(
+                'generate.html',
+                preview=preview,
+                deck_name=deck_name,
+                error=error,
+                today=date.today().isoformat()
+            )
+
+        @self.app.route('/generate/save', methods=['POST'])
+        def generate_save():
+            """Save generated cards to a .md file and reload"""
+            content = request.form.get('content', '').strip()
+            deck_name = request.form.get('deck_name', f"generated_{date.today().isoformat()}").strip()
+
+            if content:
+                safe_name = "".join(c for c in deck_name if c.isalnum() or c in "-_/")
+                target = self.cards_dir / f"{safe_name}.md"
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with open(target, 'a', encoding='utf-8') as f:
+                    f.write("\n" + content + "\n")
+                self._load_all_cards()
+
+            return redirect(url_for('index'))
 
     def _get_deck_list(self) -> list:
         """Get list of all decks"""
