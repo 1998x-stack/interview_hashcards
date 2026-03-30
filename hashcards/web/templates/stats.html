@@ -101,7 +101,7 @@
 {% block extra_scripts %}
 <script>
 (function() {
-    const states = {{ overall.by_state | tojson }};
+    const states = {{ overall.by_state | tojson | safe }};
     const labels = ['New', 'Learning', 'Review', 'Relearning'];
     const keys   = ['NEW', 'LEARNING', 'REVIEW', 'RELEARNING'];
     const data   = keys.map(k => states[k] || 0);
