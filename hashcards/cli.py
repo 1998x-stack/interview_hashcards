@@ -20,8 +20,9 @@ def cmd_drill(args):
         print(f"Error: Directory not found: {cards_dir}", file=sys.stderr)
         sys.exit(1)
     
-    # Count markdown files
-    md_files = list(cards_dir.glob("*.md"))
+    # Count markdown files (recursive, skip hidden dirs)
+    md_files = [f for f in cards_dir.rglob("*.md")
+                if not any(part.startswith('.') for part in f.relative_to(cards_dir).parts)]
     if not md_files:
         print(f"Warning: No .md files found in {cards_dir}", file=sys.stderr)
         print("Create some card files first!", file=sys.stderr)
@@ -68,10 +69,11 @@ def cmd_validate(args):
         print(f"Error: Directory not found: {cards_dir}", file=sys.stderr)
         sys.exit(1)
     
-    md_files = list(cards_dir.glob("*.md"))
+    md_files = [f for f in cards_dir.rglob("*.md")
+                if not any(part.startswith('.') for part in f.relative_to(cards_dir).parts)]
     total_cards = 0
     errors = []
-    
+
     print(f"Validating {len(md_files)} file(s)...\n")
     
     for md_file in md_files:

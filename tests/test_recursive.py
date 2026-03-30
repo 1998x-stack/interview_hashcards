@@ -44,3 +44,20 @@ def test_app_loads_cards_from_subdirectories():
         deck_names = {c.deck_name for c in app.cards_cache.values()}
         assert "top" in deck_names
         assert "sub/deep" in deck_names
+
+
+def test_app_skips_hidden_directories():
+    """Cards inside .hidden/ dirs should not be loaded"""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        make_card_file(root, "visible.md", "Q: Visible?\nA: Yes\n")
+        make_card_file(root, ".hidden/secret.md", "Q: Hidden?\nA: Yes\n")
+
+        from hashcards.web.app import HashcardsApp
+        db_path = str(root / ".test.db")
+        app = HashcardsApp(str(root), db_path=db_path)
+
+        assert len(app.cards_cache) == 1
+        deck_names = {c.deck_name for c in app.cards_cache.values()}
+        assert "visible" in deck_names
+        assert ".hidden/secret" not in deck_names

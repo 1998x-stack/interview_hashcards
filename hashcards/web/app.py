@@ -53,14 +53,16 @@ class HashcardsApp:
         self.cards_cache.clear()
 
         for md_file in self.cards_dir.rglob("*.md"):
-            # Deck name = relative path without extension, e.g. "algo/papers/BatchNorm"
-            deck_name = str(md_file.relative_to(self.cards_dir).with_suffix(''))
+            # Skip hidden directories (e.g. .planning/, .claude/)
+            if any(part.startswith('.') for part in md_file.relative_to(self.cards_dir).parts):
+                continue
+            # Deck name = relative path without extension, using forward slashes always
+            deck_name = md_file.relative_to(self.cards_dir).with_suffix('').as_posix()
             cards = CardParser.parse_file(str(md_file), deck_name=deck_name)
             for card in cards:
                 card_hash = card.get_hash()
                 self.cards_cache[card_hash] = card
 
-                # Initialize schedule if new card
                 if not self.storage.get_schedule(card_hash):
                     schedule = self.scheduler.init_card(card_hash)
                     self.storage.save_schedule(schedule, card.deck_name)
