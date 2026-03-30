@@ -1,127 +1,203 @@
 {% extends "base.html" %}
 
-{% block title %}Study - hashcards{% endblock %}
+{% block title %}Study — {{ card.deck_name }}{% endblock %}
 
 {% block content %}
-<div style="text-align: center; margin-bottom: 2rem; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;">
-    <span style="font-weight: 700; color: var(--accent); font-size: 1.1rem;">{{ card.deck_name }}</span>
+
+<!-- Deck & metadata bar -->
+<div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+        <!-- Stack icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-indigo-500" aria-hidden="true">
+            <path d="M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 8.983l7.477-3.965-7.115-3.925ZM18 6.186l-7.5 3.977v8.823l6.623-3.513A.75.75 0 0 0 18 14.82V6.186ZM9.5 18.986V10.163L2 6.186V14.82a.75.75 0 0 0 .877.74L9.5 18.987Z" />
+        </svg>
+        <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ card.deck_name }}</span>
+    </div>
+
     {% if schedule %}
-    <span style="color: var(--fg-muted); margin: 0 0.75rem;">•</span>
-    <span style="color: var(--fg-secondary); font-weight: 600;">Reviews: {{ schedule.reps }}</span>
-    {% if schedule.lapses > 0 %}
-    <span style="color: var(--fg-muted); margin: 0 0.75rem;">•</span>
-    <span style="color: var(--warning); font-weight: 600;">Lapses: {{ schedule.lapses }}</span>
-    {% endif %}
+    <div class="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-600">
+        <span>Reviews: <span class="font-semibold text-slate-600 dark:text-slate-400">{{ schedule.reps }}</span></span>
+        {% if schedule.lapses > 0 %}
+        <span>Lapses: <span class="font-semibold text-amber-500">{{ schedule.lapses }}</span></span>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 
-<div class="card" style="min-height: 400px; display: flex; flex-direction: column;">
-    <div class="card-content" id="card-content" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+<!-- Card -->
+<div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+
+    <!-- Card type badge -->
+    <div class="flex items-center justify-between border-b border-slate-100 px-6 py-3 dark:border-slate-800">
         {% if card.card_type.value == 'qa' %}
-            {# Question-Answer card #}
-            <div id="question-side" style="width: 100%;">
-                <div style="color: var(--accent); font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; letter-spacing: 0.05em;">QUESTION</div>
-                <div style="font-size: 1.35rem; line-height: 1.8;">{{ card.content.question }}</div>
-            </div>
-            <div id="answer-side" style="display: none; width: 100%;">
-                <div style="color: var(--success); font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; letter-spacing: 0.05em;">ANSWER</div>
-                <div style="font-size: 1.35rem; line-height: 1.8;">{{ card.content.answer }}</div>
-            </div>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+            Q&amp;A
+        </span>
         {% else %}
-            {# Cloze card #}
-            <div id="cloze-hidden" style="width: 100%;">
-                <div style="font-size: 1.3rem; line-height: 1.9;">
-                    {{ card.content.text | replace('[', '<span class="cloze-hidden">[...') | replace(']', ']</span>') | safe }}
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-violet-600 dark:bg-violet-950 dark:text-violet-400">
+            Cloze
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Card body -->
+    <div id="card-content" class="min-h-64 px-6 py-8">
+        {% if card.card_type.value == 'qa' %}
+            <!-- Question -->
+            <div id="question-side">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-400 dark:text-indigo-500">Question</p>
+                <p class="text-xl font-medium leading-relaxed text-slate-800 dark:text-slate-200">{{ card.content.question }}</p>
+            </div>
+
+            <!-- Answer (hidden until revealed) -->
+            <div id="answer-side" class="hidden">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-400 dark:text-indigo-500">Question</p>
+                <p class="mb-6 text-xl font-medium leading-relaxed text-slate-800 dark:text-slate-200">{{ card.content.question }}</p>
+                <div class="border-t border-slate-100 pt-6 dark:border-slate-800">
+                    <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-emerald-500">Answer</p>
+                    <p class="animate-reveal text-xl font-medium leading-relaxed text-slate-800 dark:text-slate-200">{{ card.content.answer }}</p>
                 </div>
             </div>
-            <div id="cloze-revealed" style="display: none; width: 100%;">
-                <div style="font-size: 1.3rem; line-height: 1.9;">
+
+        {% else %}
+            <!-- Cloze hidden -->
+            <div id="cloze-hidden">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-violet-400 dark:text-violet-500">Fill in the blank</p>
+                <p class="text-xl font-medium leading-relaxed text-slate-800 dark:text-slate-200">
+                    {{ card.content.text | replace('[', '<span class="cloze-hidden">[...') | replace(']', ']</span>') | safe }}
+                </p>
+            </div>
+
+            <!-- Cloze revealed -->
+            <div id="cloze-revealed" class="hidden">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-violet-400 dark:text-violet-500">Fill in the blank</p>
+                <p class="text-xl font-medium leading-relaxed text-slate-800 dark:text-slate-200">
                     {% set text = card.content.text %}
                     {% for deletion in card.content.deletions %}
                         {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
                     {% endfor %}
                     {{ text | safe }}
-                </div>
+                </p>
             </div>
         {% endif %}
     </div>
-    
-    <div id="show-answer-btn" class="buttons" style="padding-top: 2rem; border-top: 1px solid var(--border);">
-        <button onclick="showAnswer()" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border: none; padding: 1rem 2.5rem; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-            Show Answer (Space)
-        </button>
-    </div>
-    
-    <form method="POST" action="/review" id="review-form" style="display: none;">
-        <input type="hidden" name="card_hash" value="{{ card_hash }}">
-        <input type="hidden" name="deck_name" value="{{ deck_name or '' }}">
-        <input type="hidden" name="rating" id="rating-input">
-        
-        <div style="padding-top: 2rem; border-top: 1px solid var(--border);">
-            <div class="buttons">
-                <button type="button" class="again" onclick="submitReview(1)" style="flex: 1; min-width: 140px;">
-                    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Again</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 600;">Press 1 • < 10m</div>
-                </button>
-                <button type="button" class="hard" onclick="submitReview(2)" style="flex: 1; min-width: 140px;">
-                    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Hard</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 600;">
-                        Press 2 • {% if schedule.scheduled_days < 1 %}< 1d{% else %}{{ (schedule.scheduled_days * 0.8) | int }}d{% endif %}
+
+    <!-- Action area -->
+    <div class="border-t border-slate-100 px-6 py-5 dark:border-slate-800">
+
+        <!-- Show answer button -->
+        <div id="show-answer-btn" class="flex justify-center">
+            <button onclick="showAnswer()"
+                    class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                <!-- Eye icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                    <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                    <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41Z" clip-rule="evenodd" />
+                </svg>
+                Show answer
+                <kbd class="ml-1 rounded bg-indigo-500 px-1.5 py-0.5 text-xs font-mono text-indigo-100">Space</kbd>
+            </button>
+        </div>
+
+        <!-- Rating buttons (hidden until answer shown) -->
+        <form method="POST" action="/review" id="review-form" class="hidden">
+            <input type="hidden" name="card_hash" value="{{ card_hash }}">
+            <input type="hidden" name="deck_name" value="{{ deck_name or '' }}">
+            <input type="hidden" name="rating" id="rating-input">
+
+            <div class="grid grid-cols-4 gap-3">
+                <!-- Again -->
+                <button type="button" onclick="submitReview(1)"
+                        class="group cursor-pointer flex flex-col items-center gap-1 rounded-xl border-2 border-red-200 bg-red-50 px-3 py-3 transition-all duration-150 hover:border-red-400 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400 dark:border-red-900 dark:bg-red-950/50 dark:hover:border-red-600 dark:hover:bg-red-950">
+                    <span class="text-sm font-bold text-red-600 dark:text-red-400">Again</span>
+                    <div class="flex items-center gap-1">
+                        <kbd class="rounded bg-red-200 px-1 py-0.5 text-xs font-mono text-red-700 dark:bg-red-900 dark:text-red-300">1</kbd>
+                        <span class="text-xs text-red-400 dark:text-red-600">&lt;10m</span>
                     </div>
                 </button>
-                <button type="button" class="good" onclick="submitReview(3)" style="flex: 1; min-width: 140px;">
-                    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Good</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 600;">
-                        Press 3 • {% if schedule.scheduled_days < 1 %}1d{% else %}{{ schedule.scheduled_days }}d{% endif %}
+
+                <!-- Hard -->
+                <button type="button" onclick="submitReview(2)"
+                        class="group cursor-pointer flex flex-col items-center gap-1 rounded-xl border-2 border-amber-200 bg-amber-50 px-3 py-3 transition-all duration-150 hover:border-amber-400 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:border-amber-900 dark:bg-amber-950/50 dark:hover:border-amber-600 dark:hover:bg-amber-950">
+                    <span class="text-sm font-bold text-amber-600 dark:text-amber-400">Hard</span>
+                    <div class="flex items-center gap-1">
+                        <kbd class="rounded bg-amber-200 px-1 py-0.5 text-xs font-mono text-amber-700 dark:bg-amber-900 dark:text-amber-300">2</kbd>
+                        <span class="text-xs text-amber-400 dark:text-amber-600">
+                            {% if schedule.scheduled_days < 1 %}&lt;1d{% else %}{{ (schedule.scheduled_days * 0.8) | int }}d{% endif %}
+                        </span>
                     </div>
                 </button>
-                <button type="button" class="easy" onclick="submitReview(4)" style="flex: 1; min-width: 140px;">
-                    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Easy</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8; font-weight: 600;">
-                        Press 4 • {% if schedule.scheduled_days < 1 %}2d{% else %}{{ (schedule.scheduled_days * 1.3) | int }}d{% endif %}
+
+                <!-- Good -->
+                <button type="button" onclick="submitReview(3)"
+                        class="group cursor-pointer flex flex-col items-center gap-1 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-3 py-3 transition-all duration-150 hover:border-emerald-400 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:border-emerald-900 dark:bg-emerald-950/50 dark:hover:border-emerald-600 dark:hover:bg-emerald-950">
+                    <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">Good</span>
+                    <div class="flex items-center gap-1">
+                        <kbd class="rounded bg-emerald-200 px-1 py-0.5 text-xs font-mono text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">3</kbd>
+                        <span class="text-xs text-emerald-400 dark:text-emerald-600">
+                            {% if schedule.scheduled_days < 1 %}1d{% else %}{{ schedule.scheduled_days }}d{% endif %}
+                        </span>
+                    </div>
+                </button>
+
+                <!-- Easy -->
+                <button type="button" onclick="submitReview(4)"
+                        class="group cursor-pointer flex flex-col items-center gap-1 rounded-xl border-2 border-indigo-200 bg-indigo-50 px-3 py-3 transition-all duration-150 hover:border-indigo-400 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:border-indigo-900 dark:bg-indigo-950/50 dark:hover:border-indigo-600 dark:hover:bg-indigo-950">
+                    <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">Easy</span>
+                    <div class="flex items-center gap-1">
+                        <kbd class="rounded bg-indigo-200 px-1 py-0.5 text-xs font-mono text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">4</kbd>
+                        <span class="text-xs text-indigo-400 dark:text-indigo-600">
+                            {% if schedule.scheduled_days < 1 %}2d{% else %}{{ (schedule.scheduled_days * 1.3) | int }}d{% endif %}
+                        </span>
                     </div>
                 </button>
             </div>
-        </div>
-    </form>
-    
-    <div class="keyboard-hint" style="padding-top: 1rem;">
-        Press <code>Space</code> to reveal • Then <code>1</code> <code>2</code> <code>3</code> <code>4</code> to rate
+        </form>
     </div>
 </div>
 
+<!-- Keyboard hint -->
+<p class="mt-4 text-center text-xs text-slate-400 dark:text-slate-600">
+    Press <kbd class="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">Space</kbd>
+    to reveal &middot; then
+    <kbd class="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">1</kbd>
+    <kbd class="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">2</kbd>
+    <kbd class="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">3</kbd>
+    <kbd class="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 font-mono text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">4</kbd>
+    to rate
+</p>
+
 <script>
     let answerShown = false;
-    
+
     function showAnswer() {
         {% if card.card_type.value == 'qa' %}
-            document.getElementById('answer-side').style.display = 'block';
+            document.getElementById('question-side').classList.add('hidden');
+            document.getElementById('answer-side').classList.remove('hidden');
         {% else %}
-            document.getElementById('cloze-hidden').style.display = 'none';
-            document.getElementById('cloze-revealed').style.display = 'block';
+            document.getElementById('cloze-hidden').classList.add('hidden');
+            document.getElementById('cloze-revealed').classList.remove('hidden');
         {% endif %}
-        
-        document.getElementById('show-answer-btn').style.display = 'none';
-        document.getElementById('review-form').style.display = 'block';
+
+        document.getElementById('show-answer-btn').classList.add('hidden');
+        document.getElementById('review-form').classList.remove('hidden');
         answerShown = true;
     }
-    
+
     function submitReview(rating) {
         document.getElementById('rating-input').value = rating;
         document.getElementById('review-form').submit();
     }
 </script>
+
 {% endblock %}
 
 {% block keyboard_shortcuts %}
     if (e.code === 'Space') {
         e.preventDefault();
-        if (!answerShown) {
-            showAnswer();
-        }
-    } else if (answerShown && ['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
+        if (!answerShown) showAnswer();
+    } else if (answerShown && ['Digit1','Digit2','Digit3','Digit4'].includes(e.code)) {
         e.preventDefault();
-        const rating = parseInt(e.code.slice(-1));
-        submitReview(rating);
+        submitReview(parseInt(e.code.slice(-1)));
     }
 {% endblock %}

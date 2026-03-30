@@ -1,73 +1,122 @@
 {% extends "base.html" %}
 
-{% block title %}hashcards - Home{% endblock %}
+{% block title %}hashcards — Home{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 3rem;">
-    <h1 style="font-size: 3rem; margin-bottom: 0.75rem;">📚 hashcards</h1>
-    <p style="color: var(--fg-muted); font-size: 1.1rem; font-weight: 500; letter-spacing: 0.02em;">
-        Local-first spaced repetition learning
-    </p>
+
+<!-- Page header -->
+<div class="mb-8">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Local-first spaced repetition</p>
 </div>
 
-<div class="stats">
-    <div class="stat-box">
-        <div class="stat-number">{{ stats.total_cards }}</div>
-        <div class="stat-label">Total Cards</div>
+<!-- Stats row -->
+<div class="mb-8 grid grid-cols-3 gap-4">
+    <!-- Total cards -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Total cards</p>
+        <p class="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{{ stats.total_cards }}</p>
     </div>
-    <div class="stat-box">
-        <div class="stat-number">{{ stats.due_cards }}</div>
-        <div class="stat-label">Due Today</div>
+
+    <!-- Due today -->
+    <div class="rounded-xl border {% if stats.due_cards > 0 %}border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950{% else %}border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900{% endif %} p-5">
+        <p class="text-xs font-semibold uppercase tracking-widest {% if stats.due_cards > 0 %}text-indigo-500 dark:text-indigo-400{% else %}text-slate-400 dark:text-slate-500{% endif %}">Due today</p>
+        <p class="mt-2 text-3xl font-bold tabular-nums {% if stats.due_cards > 0 %}text-indigo-700 dark:text-indigo-300{% else %}text-slate-900 dark:text-slate-100{% endif %}">{{ stats.due_cards }}</p>
     </div>
-    <div class="stat-box">
-        <div class="stat-number">{{ stats.reviews_today }}</div>
-        <div class="stat-label">Reviewed Today</div>
+
+    <!-- Reviewed today -->
+    <div class="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Reviewed today</p>
+        <p class="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{{ stats.reviews_today }}</p>
     </div>
 </div>
 
+<!-- CTA or all-clear -->
 {% if stats.due_cards > 0 %}
-<div class="card" style="text-align: center;">
-    <h2 style="margin-bottom: 0.75rem;">⚡ Ready to Study?</h2>
-    <p style="color: var(--fg-secondary); font-size: 1.1rem; margin-bottom: 1.5rem;">
-        You have <strong style="color: var(--accent);">{{ stats.due_cards }}</strong> card{% if stats.due_cards != 1 %}s{% endif %} waiting for review
-    </p>
-    <div class="buttons">
-        <a href="/study" class="btn" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border: none; padding: 1rem 2.5rem; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">
-            Start Studying →
+<div class="mb-8 rounded-xl border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-950">
+    <div class="flex items-center justify-between gap-4">
+        <div>
+            <h2 class="text-base font-semibold text-indigo-900 dark:text-indigo-100">Ready to study?</h2>
+            <p class="mt-0.5 text-sm text-indigo-600 dark:text-indigo-400">
+                <span class="font-semibold tabular-nums">{{ stats.due_cards }}</span>
+                card{% if stats.due_cards != 1 %}s{% endif %} waiting for review
+            </p>
+        </div>
+        <a href="/study"
+           class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-indigo-950">
+            <!-- Bolt icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                <path d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h6.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-6.572l1.305-6.093Z" />
+            </svg>
+            Start studying
         </a>
     </div>
 </div>
 {% else %}
-<div class="card" style="text-align: center;">
-    <div style="font-size: 3.5rem; margin-bottom: 1rem;">✨</div>
-    <h2 style="margin-bottom: 0.75rem;">All Caught Up!</h2>
-    <p style="color: var(--fg-secondary); font-size: 1.05rem;">
-        No cards due for review right now. Come back later, or browse your collection.
-    </p>
+<div class="mb-8 rounded-xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-800 dark:bg-emerald-950">
+    <div class="flex items-center gap-3">
+        <!-- Check circle icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+        </svg>
+        <div>
+            <h2 class="text-base font-semibold text-emerald-900 dark:text-emerald-100">All caught up</h2>
+            <p class="text-sm text-emerald-700 dark:text-emerald-400">No cards due right now. Come back later or browse your collection.</p>
+        </div>
+    </div>
 </div>
 {% endif %}
 
-<h2 style="margin-top: 3rem; margin-bottom: 1.5rem; font-size: 1.5rem;">Your Decks</h2>
-<ul class="deck-list">
-    {% for deck in decks %}
-    <li>
-        <a href="/study/{{ deck.name }}">
-            <span style="font-size: 1.05rem;">{{ deck.name }}</span>
-            <span style="color: var(--fg-muted); font-size: 0.9rem; background: rgba(59, 130, 246, 0.1); padding: 0.25rem 0.75rem; border-radius: 12px; font-weight: 600;">
-                {{ deck.count }} cards
-            </span>
-        </a>
-    </li>
-    {% endfor %}
-</ul>
+<!-- Decks -->
+<div>
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Decks</h2>
 
-<div style="margin-top: 3rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; color: var(--fg-muted); font-size: 0.9rem;">
-    <p style="font-weight: 700; color: var(--fg-primary); margin-bottom: 1rem; font-size: 1rem;">💡 Tips</p>
-    <ul style="margin-left: 1.5rem; line-height: 2; color: var(--fg-secondary);">
-        <li>Edit cards by modifying <code>.md</code> files in your cards directory</li>
-        <li>Cards are identified by content hash — editing creates a new card</li>
-        <li>Use Git to track changes and share your collection</li>
-        <li>Reload cards with <code>GET /api/reload</code></li>
+    {% if decks %}
+    <ul class="space-y-2" role="list">
+        {% for deck in decks %}
+        <li>
+            <a href="/study/{{ deck.name }}"
+               class="group flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 transition-all duration-150 hover:border-indigo-300 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-950 dark:focus:ring-offset-slate-950">
+                <div class="flex items-center gap-3">
+                    <!-- Stack/layers icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 flex-shrink-0 text-slate-400 transition-colors group-hover:text-indigo-500 dark:text-slate-600 dark:group-hover:text-indigo-400" aria-hidden="true">
+                        <path d="M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 8.983l7.477-3.965-7.115-3.925ZM18 6.186l-7.5 3.977v8.823l6.623-3.513A.75.75 0 0 0 18 14.82V6.186ZM9.5 18.986V10.163L2 6.186V14.82a.75.75 0 0 0 .877.74L9.5 18.987Z" />
+                    </svg>
+                    <span class="text-sm font-medium text-slate-700 transition-colors group-hover:text-indigo-700 dark:text-slate-300 dark:group-hover:text-indigo-300">{{ deck.name }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-slate-600 transition-colors group-hover:bg-indigo-100 group-hover:text-indigo-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-indigo-900 dark:group-hover:text-indigo-300">
+                        {{ deck.count }}
+                    </span>
+                    <!-- Chevron right -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-indigo-500 dark:text-slate-600 dark:group-hover:text-indigo-400" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </a>
+        </li>
+        {% endfor %}
     </ul>
+    {% else %}
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
+        <p class="text-sm text-slate-500 dark:text-slate-400">No decks found. Add <code class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs dark:bg-slate-800">.md</code> files to get started.</p>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Tips (compact) -->
+<details class="mt-8">
+    <summary class="cursor-pointer select-none text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-600 dark:hover:text-slate-400">
+        Tips &amp; shortcuts
+    </summary>
+    <div class="mt-3 rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+        <ul class="space-y-1.5">
+            <li>Cards are plain <code class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs dark:bg-slate-800">.md</code> files — edit them in any text editor</li>
+            <li>Content-addressable: editing a card creates a new card entry</li>
+            <li>Use Git to version-control and share decks</li>
+            <li>Reload cards via <code class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs dark:bg-slate-800">GET /api/reload</code></li>
+        </ul>
+    </div>
+</details>
+
 {% endblock %}

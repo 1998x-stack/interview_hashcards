@@ -1,40 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}No Cards Due - hashcards{% endblock %}
+{% block title %}All done — hashcards{% endblock %}
 
 {% block content %}
-<div class="card" style="text-align: center; padding: 4rem 2rem; min-height: 500px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-    <div style="font-size: 5rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite;">✨</div>
-    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">All Done!</h1>
-    <p style="font-size: 1.15rem; color: var(--fg-secondary); max-width: 500px; margin: 0 auto 0.75rem; line-height: 1.7;">
+
+<div class="flex min-h-96 flex-col items-center justify-center py-16 text-center">
+    <!-- Check circle -->
+    <div class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-8 w-8 text-emerald-500" aria-hidden="true">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+        </svg>
+    </div>
+
+    <h1 class="mb-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">All done!</h1>
+
+    <p class="mb-1 max-w-sm text-base text-slate-600 dark:text-slate-400">
         {% if deck_name %}
-        No cards due in the <strong style="color: var(--accent);">{{ deck_name }}</strong> deck right now.
+        No cards due in <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ deck_name }}</span> right now.
         {% else %}
         No cards are due for review at the moment.
         {% endif %}
     </p>
-    <p style="font-size: 1rem; color: var(--fg-muted); margin-bottom: 2.5rem;">
-        Come back later, or explore your collection.
-    </p>
-    
-    <div class="buttons" style="gap: 1.25rem;">
-        <a href="/" class="btn" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border: none; padding: 1rem 2rem; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-            ← Back to Home
+    <p class="mb-8 text-sm text-slate-400 dark:text-slate-600">Come back later, or explore your collection.</p>
+
+    <div class="flex flex-wrap justify-center gap-3">
+        <a href="/"
+           class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950">
+            <!-- Home icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" clip-rule="evenodd" />
+            </svg>
+            Back to home
         </a>
-        <a href="/browse" class="btn" style="background: var(--bg-card); border: 2px solid var(--border); padding: 1rem 2rem; font-size: 1.05rem;">
-            Browse Cards →
+        <a href="/browse"
+           class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors duration-150 hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:focus:ring-offset-slate-950">
+            Browse cards
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4" aria-hidden="true">
+                <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
         </a>
     </div>
 </div>
 
-<style>
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-20px);
-    }
-}
-</style>
 {% endblock %}

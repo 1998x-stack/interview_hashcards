@@ -1,83 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}Browse Cards - hashcards{% endblock %}
+{% block title %}Browse Cards{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 2.5rem;">
-    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖 Browse Cards</h1>
-    {% if deck_name %}
-    <p style="color: var(--fg-muted); font-size: 1.05rem;">
-        Deck: <strong style="color: var(--accent);">{{ deck_name }}</strong>
-    </p>
-    {% endif %}
-</div>
 
-<div style="margin-bottom: 2rem; padding: 1rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: inline-block;">
-    <span style="font-weight: 700; font-size: 1.25rem; color: var(--accent);">{{ cards | length }}</span>
-    <span style="color: var(--fg-secondary); font-weight: 600; margin-left: 0.5rem;">
-        card{% if cards | length != 1 %}s{% endif %}
+<!-- Header -->
+<div class="mb-6 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Browse</h1>
+        {% if deck_name %}
+        <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            Deck: <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ deck_name }}</span>
+        </p>
+        {% endif %}
+    </div>
+    <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold tabular-nums text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        {{ cards | length }} card{% if cards | length != 1 %}s{% endif %}
     </span>
 </div>
 
-{% for item in cards %}
-<div class="card">
+<!-- Card list -->
+{% if cards %}
+<ul class="space-y-3" role="list">
+    {% for item in cards %}
     {% set card = item.card %}
     {% set schedule = item.schedule %}
-    
-    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-        <div>
-            <span style="font-weight: 700; font-size: 1.05rem; color: var(--accent);">{{ card.deck_name }}</span>
-            <span style="background: rgba(59, 130, 246, 0.15); color: var(--accent); padding: 0.25rem 0.75rem; border-radius: 8px; font-size: 0.8rem; margin-left: 0.75rem; font-weight: 700; letter-spacing: 0.05em;">
-                {% if card.card_type.value == 'qa' %}Q&A{% else %}CLOZE{% endif %}
-            </span>
-        </div>
-        {% if schedule %}
-        <div style="text-align: right; font-size: 0.85rem; color: var(--fg-muted); line-height: 1.6;">
-            <div style="font-weight: 600;">Reviews: <span style="color: var(--accent);">{{ schedule.reps }}</span></div>
-            {% if schedule.state == 2 %}
-            <div style="font-weight: 600;">Interval: <span style="color: var(--success);">{{ schedule.scheduled_days }}d</span></div>
+    <li class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+
+        <!-- Card header -->
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-slate-500 dark:text-slate-500">{{ card.deck_name }}</span>
+                {% if card.card_type.value == 'qa' %}
+                <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">Q&amp;A</span>
+                {% else %}
+                <span class="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-violet-600 dark:bg-violet-950 dark:text-violet-400">Cloze</span>
+                {% endif %}
+            </div>
+            {% if schedule %}
+            <div class="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-600">
+                <span>{{ schedule.reps }} reviews</span>
+                {% if schedule.state == 2 %}
+                <span class="text-emerald-500">{{ schedule.scheduled_days }}d interval</span>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
-        {% endif %}
-    </div>
-    
-    {% if card.card_type.value == 'qa' %}
-        <div style="margin-bottom: 1rem;">
-            <div style="color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">QUESTION</div>
-            <div style="font-size: 1.05rem; line-height: 1.7; color: var(--fg-secondary);">{{ card.content.question }}</div>
+
+        <!-- Card content -->
+        <div class="px-4 py-4">
+            {% if card.card_type.value == 'qa' %}
+            <div class="space-y-3">
+                <div>
+                    <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-indigo-400 dark:text-indigo-500">Question</p>
+                    <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{{ card.content.question }}</p>
+                </div>
+                <div class="border-t border-slate-100 pt-3 dark:border-slate-800">
+                    <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-emerald-500">Answer</p>
+                    <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{{ card.content.answer }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-violet-400 dark:text-violet-500">Cloze</p>
+                <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                    {% set text = card.content.text %}
+                    {% for deletion in card.content.deletions %}
+                        {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
+                    {% endfor %}
+                    {{ text | safe }}
+                </p>
+            </div>
+            {% endif %}
         </div>
-        <div>
-            <div style="color: var(--success); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">ANSWER</div>
-            <div style="font-size: 1.05rem; line-height: 1.7; color: var(--fg-secondary);">{{ card.content.answer }}</div>
-        </div>
-    {% else %}
-        <div>
-            <div style="color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.5rem;">CLOZE</div>
-            <div style="font-size: 1.05rem; line-height: 1.8;">
-                {% set text = card.content.text %}
-                {% for deletion in card.content.deletions %}
-                    {% set text = text | replace('[' ~ deletion ~ ']', '<span class="cloze-revealed">' ~ deletion ~ '</span>') %}
-                {% endfor %}
-                {{ text | safe }}
+
+        <!-- Schedule footer -->
+        {% if schedule %}
+        <div class="border-t border-slate-100 px-4 py-2 dark:border-slate-800">
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 dark:text-slate-600">
+                <span>Due: <span class="text-slate-500 dark:text-slate-500">{{ schedule.due.strftime('%Y-%m-%d %H:%M') }}</span></span>
+                <span>Difficulty: <span class="text-amber-500">{{ "%.1f" | format(schedule.difficulty) }}</span></span>
+                <span>Stability: <span class="text-emerald-500">{{ "%.1f" | format(schedule.stability) }}d</span></span>
             </div>
         </div>
-    {% endif %}
-    
-    {% if schedule %}
-    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--fg-muted); display: flex; gap: 1.5rem; flex-wrap: wrap;">
-        <span style="font-weight: 600;">Due: <span style="color: var(--fg-secondary);">{{ schedule.due.strftime('%Y-%m-%d %H:%M') }}</span></span>
-        <span style="font-weight: 600;">Difficulty: <span style="color: var(--warning);">{{ "%.1f" | format(schedule.difficulty) }}</span></span>
-        <span style="font-weight: 600;">Stability: <span style="color: var(--success);">{{ "%.1f" | format(schedule.stability) }}d</span></span>
-    </div>
-    {% endif %}
-</div>
-{% endfor %}
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
 
-{% if cards | length == 0 %}
-<div class="card" style="text-align: center; padding: 3rem;">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
-    <p style="color: var(--fg-secondary); font-size: 1.15rem; margin-bottom: 0.75rem; font-weight: 600;">No cards found</p>
-    <p style="color: var(--fg-muted);">Create some <code>.md</code> files in your cards directory to get started!</p>
+{% else %}
+<!-- Empty state -->
+<div class="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center dark:border-slate-700 dark:bg-slate-900">
+    <!-- Document icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-700" aria-hidden="true">
+        <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75-6.75a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd" />
+        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+    </svg>
+    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No cards found</p>
+    <p class="mt-1 text-xs text-slate-400 dark:text-slate-600">
+        Create <code class="rounded bg-slate-100 px-1 font-mono dark:bg-slate-800">.md</code> files in your cards directory to get started
+    </p>
 </div>
 {% endif %}
+
 {% endblock %}

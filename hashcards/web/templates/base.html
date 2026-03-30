@@ -1,460 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}hashcards{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50:  '#EEF2FF',
+                            100: '#E0E7FF',
+                            200: '#C7D2FE',
+                            400: '#818CF8',
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            700: '#4338CA',
+                            900: '#312E81',
+                        }
+                    },
+                    animation: {
+                        'fade-up': 'fadeUp 0.35s ease both',
+                        'reveal': 'reveal 0.2s ease both',
+                    },
+                    keyframes: {
+                        fadeUp: {
+                            '0%':   { opacity: '0', transform: 'translateY(12px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        reveal: {
+                            '0%':   { opacity: '0', transform: 'scale(0.97)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
-        
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #334155;
-            --fg-primary: #f1f5f9;
-            --fg-secondary: #cbd5e1;
-            --fg-muted: #94a3b8;
-            --border: #475569;
-            --accent: #3b82f6;
-            --accent-hover: #60a5fa;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-        
-        @media (prefers-color-scheme: light) {
-            :root {
-                --bg-primary: #ffffff;
-                --bg-secondary: #f8fafc;
-                --bg-card: #ffffff;
-                --fg-primary: #0f172a;
-                --fg-secondary: #334155;
-                --fg-muted: #64748b;
-                --border: #e2e8f0;
-                --shadow: rgba(0, 0, 0, 0.05);
-            }
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--fg-primary);
-            line-height: 1.6;
-            padding: 1.5rem;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        nav {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 2rem;
-            box-shadow: 0 4px 6px var(--shadow);
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
-        }
-        
-        nav:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 12px var(--shadow);
-        }
-        
-        nav a {
-            color: var(--fg-secondary);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            letter-spacing: 0.02em;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        
-        nav a:hover {
-            color: var(--accent);
-            background: rgba(59, 130, 246, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: all 0.3s ease;
-            transform: translateX(-50%);
-        }
-        
-        nav a:hover::after {
-            width: 80%;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-        }
-        
-        h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--fg-primary);
-        }
-        
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 16px var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--success), var(--warning));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px var(--shadow);
-            border-color: var(--accent);
-        }
-        
-        .card:hover::before {
-            opacity: 1;
-        }
-        
-        .card-content {
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            min-height: 120px;
-            line-height: 1.8;
-            color: var(--fg-secondary);
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        button, .btn {
-            padding: 0.875rem 1.75rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            background: var(--bg-card);
-            color: var(--fg-primary);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            display: inline-block;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        button::before, .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease, height 0.4s ease;
-        }
-        
-        button:hover::before, .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        button:hover, .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px var(--shadow);
-        }
-        
-        button:active, .btn:active {
-            transform: translateY(-1px);
-        }
-        
-        button.again { 
-            border-color: var(--error); 
-            color: var(--error);
-            background: rgba(239, 68, 68, 0.1);
-        }
-        button.hard { 
-            border-color: var(--warning); 
-            color: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
-        button.good { 
-            border-color: var(--success); 
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-        button.easy { 
-            border-color: var(--accent); 
-            color: var(--accent);
-            background: rgba(59, 130, 246, 0.1);
-        }
-        
-        button.again:hover { 
-            background: var(--error); 
-            color: white; 
-            border-color: var(--error);
-        }
-        button.hard:hover { 
-            background: var(--warning); 
-            color: white; 
-            border-color: var(--warning);
-        }
-        button.good:hover { 
-            background: var(--success); 
-            color: white; 
-            border-color: var(--success);
-        }
-        button.easy:hover { 
-            background: var(--accent); 
-            color: white; 
-            border-color: var(--accent);
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2.5rem;
-        }
-        
-        .stat-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-box::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px var(--shadow);
-            border-color: var(--accent);
-        }
-        
-        .stat-box:hover::after {
-            transform: scaleX(1);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
-        
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--fg-muted);
-            margin-top: 0.5rem;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        
+        /* Cloze states */
         .cloze-hidden {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            padding: 0.35rem 0.75rem;
-            border-radius: 8px;
-            font-weight: 700;
+            display: inline-block;
+            background: #fef3c7;
             color: #92400e;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .cloze-revealed {
-            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-            padding: 0.35rem 0.75rem;
-            border-radius: 8px;
-            font-weight: 700;
-            color: #166534;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            animation: reveal 0.3s ease;
-        }
-        
-        @keyframes reveal {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .keyboard-hint {
-            text-align: center;
-            color: var(--fg-muted);
-            font-size: 0.875rem;
-            margin-top: 1.5rem;
-            font-weight: 500;
-        }
-        
-        code {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--accent);
-            padding: 0.35rem 0.65rem;
+            padding: 0.1rem 0.6rem;
             border-radius: 6px;
-            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-            font-size: 0.9em;
-            font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        
-        .deck-list {
-            list-style: none;
-        }
-        
-        .deck-list li {
-            padding: 1.25rem;
-            margin-bottom: 0.75rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .deck-list li::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, var(--accent), var(--accent-hover));
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .deck-list li:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px var(--shadow);
-            border-color: var(--accent);
-        }
-        
-        .deck-list li:hover::before {
-            transform: scaleY(1);
-        }
-        
-        .deck-list a {
-            color: var(--fg-primary);
-            text-decoration: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             font-weight: 600;
         }
-        
-        .deck-list a:hover {
-            color: var(--accent);
+        .cloze-revealed {
+            display: inline-block;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.1rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            animation: reveal 0.2s ease both;
         }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @media (prefers-color-scheme: dark) {
+            .cloze-hidden  { background: #451a03; color: #fcd34d; }
+            .cloze-revealed{ background: #064e3b; color: #6ee7b7; }
         }
-        
-        main {
-            animation: fadeInUp 0.5s ease;
+        @keyframes reveal {
+            from { opacity: 0; transform: scale(0.95); }
+            to   { opacity: 1; transform: scale(1); }
         }
     </style>
+
     {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <div class="container">
-        <nav>
-            <a href="/">Home</a>
-            <a href="/study">Study</a>
-            <a href="/browse">Browse</a>
-        </nav>
-        
-        <main>
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-    
+<body class="h-full bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 font-sans">
+
+    <!-- Skip to content (a11y) -->
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-md focus:text-sm focus:font-medium">
+        Skip to content
+    </a>
+
+    <!-- Top nav -->
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6">
+            <nav class="flex h-14 items-center justify-between" aria-label="Main navigation">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950" aria-label="hashcards home">
+                    <span class="font-mono text-lg font-bold tracking-tight text-brand-600 dark:text-brand-400">#</span>
+                    <span class="text-base font-semibold text-slate-900 dark:text-slate-100">hashcards</span>
+                </a>
+
+                <!-- Nav links -->
+                <div class="flex items-center gap-1" role="list">
+                    <a href="/" role="listitem"
+                       class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+                        Home
+                    </a>
+                    <a href="/study" role="listitem"
+                       class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+                        Study
+                    </a>
+                    <a href="/browse" role="listitem"
+                       class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+                        Browse
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page content -->
+    <main id="main" class="mx-auto max-w-3xl px-4 py-8 sm:px-6 animate-fade-up">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global keyboard handler -->
     <script>
         document.addEventListener('keydown', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
             {% block keyboard_shortcuts %}{% endblock %}
         });
     </script>
+
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
