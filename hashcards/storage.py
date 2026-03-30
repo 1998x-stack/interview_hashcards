@@ -272,7 +272,7 @@ class CardStorage:
             FROM reviews
             WHERE review_time >= DATE('now', ? || ' days')
             GROUP BY day
-        """, (f'-{days}',))
+        """, (f'-{days - 1}',))
 
         counts = {row['day']: row['cnt'] for row in cursor.fetchall()}
 
@@ -317,8 +317,8 @@ class CardStorage:
                 'learning': row['learning'],
                 'review': row['review'],
                 'relearning': row['relearning'],
-                'avg_difficulty': round(row['avg_difficulty'] or 0, 1),
-                'lapse_rate': round(row['lapse_rate'] or 0, 2),
+                'avg_difficulty': round(row['avg_difficulty'] if row['avg_difficulty'] is not None else 0, 1),
+                'lapse_rate': round(row['lapse_rate'] if row['lapse_rate'] is not None else 0, 2),
             }
             for row in rows
         ]
