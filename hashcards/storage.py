@@ -256,7 +256,73 @@ class CardStorage:
             'by_state': by_state,
             'reviews_today': reviews_today
         }
-    
+
+    def get_review_history(self, days: int = 365) -> dict:
+        """
+        Return daily review counts for the last N days.
+
+        Returns:
+            {date_str: count} for every day in the range (zeros included)
+        """
+        from datetime import date, timedelta
+
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT DATE(review_time) as day, COUNT(*) as cnt
+            FROM reviews
+            WHERE review_time >= DATE('now', ? || ' days')
+            GROUP BY day
+        """, (f'-{days}',))
+
+        counts = {row['day']: row['cnt'] for row in cursor.fetchall()}
+
+        # Fill in zeros for days with no reviews
+        result = {}
+        today = date.today()
+        for i in range(days - 1, -1, -1):
+            d = (today - timedelta(days=i)).isoformat()
+            result[d] = counts.get(d, 0)
+        return result
+
+    def get_deck_stats(self) -> list:
+        """
+        Return per-deck aggregates.
+
+        Returns:
+            List of dicts: deck_name, total, new, learning, review, relearning,
+                           avg_difficulty, lapse_rate
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT
+                deck_name,
+                COUNT(*) as total,
+                SUM(CASE WHEN state = 0 THEN 1 ELSE 0 END) as new_count,
+                SUM(CASE WHEN state = 1 THEN 1 ELSE 0 END) as learning,
+                SUM(CASE WHEN state = 2 THEN 1 ELSE 0 END) as review,
+                SUM(CASE WHEN state = 3 THEN 1 ELSE 0 END) as relearning,
+                AVG(difficulty) as avg_difficulty,
+                AVG(lapses) as lapse_rate
+            FROM schedules
+            GROUP BY deck_name
+            ORDER BY deck_name
+        """)
+
+        rows = cursor.fetchall()
+        return [
+            {
+                'deck_name': row['deck_name'],
+                'total': row['total'],
+                'new': row['new_count'],
+                'learning': row['learning'],
+                'review': row['review'],
+                'relearning': row['relearning'],
+                'avg_difficulty': round(row['avg_difficulty'] or 0, 1),
+                'lapse_rate': round(row['lapse_rate'] or 0, 2),
+            }
+            for row in rows
+        ]
+
     def delete_card(self, card_hash: str):
         """Delete card and its review history"""
         cursor = self.conn.cursor()
