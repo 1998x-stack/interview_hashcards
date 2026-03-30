@@ -212,7 +212,7 @@ class HashcardsApp:
             deck_name = request.form.get('deck_name', f"generated_{date.today().isoformat()}").strip()
 
             if content:
-                safe_name = "".join(c for c in deck_name if c.isalnum() or c in "-_/")
+                safe_name = "".join(c for c in deck_name if c.isalnum() or c in "-_/").lstrip("/")
                 target = self.cards_dir / f"{safe_name}.md"
                 target.parent.mkdir(parents=True, exist_ok=True)
                 with open(target, 'a', encoding='utf-8') as f:
