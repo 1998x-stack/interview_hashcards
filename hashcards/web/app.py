@@ -79,7 +79,7 @@ class HashcardsApp:
             return render_template('index.html', stats=stats, decks=decks)
         
         @self.app.route('/study')
-        @self.app.route('/study/<deck_name>')
+        @self.app.route('/study/<path:deck_name>')
         def study(deck_name: Optional[str] = None):
             """Study session"""
             due_hashes = self.storage.get_due_cards(deck_name, limit=1)
@@ -138,7 +138,7 @@ class HashcardsApp:
             return jsonify({'status': 'ok', 'cards_loaded': len(self.cards_cache)})
         
         @self.app.route('/browse')
-        @self.app.route('/browse/<deck_name>')
+        @self.app.route('/browse/<path:deck_name>')
         def browse(deck_name: Optional[str] = None):
             """Browse all cards"""
             if deck_name:
