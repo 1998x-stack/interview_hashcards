@@ -2,6 +2,9 @@
 
 一个 **本地优先（local-first）** 的间隔重复学习应用，灵感来自 Anki 和 Mochi。
 
+[![GitHub Pages](https://img.shields.io/badge/demo-online-6366F1?logo=github)](https://1998x-stack.github.io/interview_hashcards/hashcards/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 ![hashcards界面](images/example.png)
 
 ## 理念（Philosophy）
@@ -106,10 +109,16 @@ hashcards/
 │   ├── scheduler.py       # FSRS 调度算法
 │   ├── storage.py         # SQLite 数据库管理
 │   ├── hasher.py          # 内容寻址哈希
+│   ├── generator.py       # AI 卡片生成（DashScope）
 │   ├── cli.py             # 命令行接口
 │   └── web/
-│       ├── app.py        # Flask 应用
-│       └── templates/    # HTML 模板
+│       ├── app.py         # Flask 应用
+│       └── templates/     # HTML 模板（暗色主题 + 主题切换）
+├── docs/                  # GitHub Pages 静态站点
+│   ├── index.html         # 项目主页
+│   └── hashcards/         # 交互式在线演示
+├── .github/workflows/     # CI/CD 自动部署
+├── tests/                 # 测试用例
 ├── setup.py
 ├── requirements.txt
 └── README.md
@@ -127,6 +136,14 @@ hashcards stats <cards_directory>
 # 校验卡片语法
 hashcards validate <cards_directory>
 ```
+
+## 在线演示（Online Demo）
+
+无需安装，直接在浏览器中体验 hashcards 的交互界面：
+
+👉 **[在线演示](https://1998x-stack.github.io/interview_hashcards/hashcards/)**
+
+包含示例卡片、键盘快捷键、评分按钮和统计仪表盘。
 
 ## 高级用法（Advanced Usage）
 

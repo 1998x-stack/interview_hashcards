@@ -2,6 +2,9 @@
 
 A local-first spaced repetition learning application, inspired by Anki and Mochi.
 
+[![GitHub Pages](https://img.shields.io/badge/demo-online-6366F1?logo=github)](https://1998x-stack.github.io/interview_hashcards/hashcards/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 ![hashcards界面](images/example.png)
 
 ## Philosophy
@@ -106,10 +109,16 @@ hashcards/
 │   ├── scheduler.py       # FSRS scheduling algorithm
 │   ├── storage.py         # SQLite database management
 │   ├── hasher.py         # Content-addressable hashing
+│   ├── generator.py       # AI card generation (DashScope)
 │   ├── cli.py            # Command-line interface
 │   └── web/
 │       ├── app.py        # Flask application
-│       └── templates/    # HTML templates
+│       └── templates/    # HTML templates (dark theme + toggle)
+├── docs/                  # GitHub Pages static site
+│   ├── index.html         # Project landing page
+│   └── hashcards/         # Interactive online demo
+├── .github/workflows/     # CI/CD auto-deploy
+├── tests/                 # Test suite
 ├── setup.py
 ├── requirements.txt
 └── README.md
@@ -127,6 +136,14 @@ hashcards stats <cards_directory>
 # Validate card syntax
 hashcards validate <cards_directory>
 ```
+
+## Online Demo
+
+Try the hashcards interface directly in your browser — no installation needed:
+
+👉 **[Live Demo](https://1998x-stack.github.io/interview_hashcards/hashcards/)**
+
+Includes sample cards, keyboard shortcuts, rating buttons, and a stats dashboard.
 
 ## Advanced Usage
 
