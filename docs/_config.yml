@@ -1,0 +1,15 @@
+# GitHub Pages Jekyll config for hashcards landing page
+# Exclude non-site directories from Jekyll processing
+exclude:
+  - superpowers/
+  - "*.md"
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+
+# Keep our static assets as-is
+keep_files:
+  - base-dark.css
+  - images/
+  - .nojekyll

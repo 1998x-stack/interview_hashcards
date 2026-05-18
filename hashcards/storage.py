@@ -206,7 +206,8 @@ class CardStorage:
         query += " ORDER BY due ASC"
         
         if limit:
-            query += f" LIMIT {limit}"
+            query += " LIMIT ?"
+            params.append(limit)
         
         cursor.execute(query, params)
         return [row['card_hash'] for row in cursor.fetchall()]

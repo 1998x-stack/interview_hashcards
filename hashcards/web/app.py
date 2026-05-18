@@ -108,8 +108,16 @@ class HashcardsApp:
         def review():
             """Process card review"""
             card_hash = request.form.get('card_hash')
-            rating = int(request.form.get('rating'))
+            rating_str = request.form.get('rating')
             deck_name = request.form.get('deck_name')
+            
+            # Validate rating is 1-4
+            try:
+                rating = int(rating_str)
+                if rating not in (1, 2, 3, 4):
+                    rating = 1  # default to Again on invalid input
+            except (ValueError, TypeError):
+                rating = 1
             
             schedule = self.storage.get_schedule(card_hash)
             if schedule:
@@ -118,8 +126,12 @@ class HashcardsApp:
                 
                 # Save to database
                 card = self.cards_cache.get(card_hash)
-                self.storage.save_schedule(new_schedule, card.deck_name)
-                self.storage.log_review(log)
+                if card is None:
+                    # Card was deleted between due check and review
+                    self.storage.delete_card(card_hash)
+                else:
+                    self.storage.save_schedule(new_schedule, card.deck_name)
+                    self.storage.log_review(log)
             
             # Continue to next card
             return redirect(url_for('study', deck_name=deck_name))
@@ -213,6 +225,9 @@ class HashcardsApp:
 
             if content:
                 safe_name = "".join(c for c in deck_name if c.isalnum() or c in "-_/").lstrip("/")
+                # Prevent directory traversal via ".." segments
+                if ".." in safe_name.split("/"):
+                    return redirect(url_for('index'))
                 target = self.cards_dir / f"{safe_name}.md"
                 target.parent.mkdir(parents=True, exist_ok=True)
                 with open(target, 'a', encoding='utf-8') as f:

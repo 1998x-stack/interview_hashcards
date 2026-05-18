@@ -38,5 +38,6 @@ class CardGenerator:
                 {"role": "user", "content": user_content},
             ],
             extra_body={"enable_thinking": False},
+            timeout=60.0,
         )
         return response.choices[0].message.content or ""

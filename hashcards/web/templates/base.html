@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}hashcards{% endblock %}</title>
+    <meta name="description" content="Local-first spaced repetition learning">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>#</text></svg>">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'media',
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Consolas', 'monospace'],
                     },
                     colors: {
                         brand: {
@@ -49,13 +52,34 @@
     <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
+        /* ── Design tokens ── */
+        :root {
+            --bg-elevated: #ffffff;
+            --bg-card: #f8fafc;
+            --border-subtle: #e2e8f0;
+            --border-emphasis: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #94a3b8;
+        }
+        .dark {
+            --bg-elevated: #0f172a;
+            --bg-card: #1e293b;
+            --border-subtle: #1e293b;
+            --border-emphasis: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+        }
+
         /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
+
         /* Cloze states */
         .cloze-hidden {
             display: inline-block;
@@ -74,19 +98,40 @@
             font-weight: 600;
             animation: reveal 0.2s ease both;
         }
-        @media (prefers-color-scheme: dark) {
-            .cloze-hidden  { background: #451a03; color: #fcd34d; }
-            .cloze-revealed{ background: #064e3b; color: #6ee7b7; }
-        }
+        .dark .cloze-hidden  { background: #451a03; color: #fcd34d; }
+        .dark .cloze-revealed{ background: #064e3b; color: #6ee7b7; }
+
         @keyframes reveal {
             from { opacity: 0; transform: scale(0.95); }
             to   { opacity: 1; transform: scale(1); }
         }
+
+        /* Theme toggle */
+        .theme-toggle {
+            display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border-subtle); background: transparent;
+            cursor: pointer; color: var(--text-secondary); transition: all .15s;
+        }
+        .theme-toggle:hover { background: var(--bg-card); border-color: var(--border-emphasis); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        .light .theme-toggle .icon-dark { display: none; }
+        .dark .theme-toggle .icon-light { display: none; }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-tertiary); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* Selection */
+        ::selection { background: #6366F1; color: white; }
+        .dark ::selection { background: #818CF8; color: #0f172a; }
     </style>
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 font-sans">
+<body class="h-full bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 font-sans">
 
     <!-- Skip to content (a11y) -->
     <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-md focus:text-sm focus:font-medium">
@@ -125,6 +170,11 @@
                        class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100">
                         Generate
                     </a>
+                    <!-- Theme toggle -->
+                    <button class="theme-toggle ml-1" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle theme">
+                        <svg class="icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 2ZM10 15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 15ZM10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM15.657 5.404a.75.75 0 1 0-1.06-1.06l-1.061 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM6.464 14.596a.75.75 0 1 0-1.06-1.06l-1.06 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM18 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 18 10ZM5 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 5 10ZM14.596 15.657a.75.75 0 0 0 1.06-1.06l-1.06-1.061a.75.75 0 1 0-1.06 1.06l1.06 1.06ZM5.404 6.464a.75.75 0 0 0 1.06-1.06l-1.06-1.06a.75.75 0 1 0-1.061 1.06l1.06 1.06Z"/></svg>
+                        <svg class="icon-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.455 2.004a.75.75 0 0 1 .26.77 7 7 0 0 0 9.958 7.967.75.75 0 0 1 1.067.853A8.5 8.5 0 1 1 6.647 1.921a.75.75 0 0 1 .808.083Z" clip-rule="evenodd"/></svg>
+                    </button>
                 </div>
             </nav>
         </div>
@@ -135,12 +185,33 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
+    <footer class="mx-auto max-w-3xl px-4 pb-8 sm:px-6">
+        <div class="border-t border-slate-100 pt-6 text-center text-xs text-slate-400 dark:border-slate-800 dark:text-slate-600">
+            hashcards · local-first spaced repetition · <a href="https://github.com/1998x-stack/interview_hashcards" class="hover:text-slate-600 dark:hover:text-slate-400 transition-colors">GitHub</a>
+        </div>
+    </footer>
+
     <!-- Global keyboard handler -->
     <script>
         document.addEventListener('keydown', function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
             {% block keyboard_shortcuts %}{% endblock %}
         });
+    </script>
+
+    <!-- Theme toggle -->
+    <script>
+        (function() {
+            const saved = localStorage.getItem('hashcards-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('hashcards-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
     </script>
 
     {% block extra_scripts %}{% endblock %}
