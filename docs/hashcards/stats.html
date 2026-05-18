@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stats — hashcards Demo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>#</text></svg>">
+<link rel="stylesheet" href="../base-dark.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  :root { --c1:#6366F1; --c2:#8B5CF6; --c3:#10B981; --c4:#F59E0B; --c5:#EF4444; }
+  .hero h1 em { background:linear-gradient(90deg,var(--c1),var(--c2)); }
+  .stat-box {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; padding:24px; text-align:center;
+    transition:border-color .2s,background .15s; flex:1; min-width:120px;
+  }
+  .stat-box:hover { border-color:var(--border2); background:var(--bg3); }
+  .stat-num { font-size:36px; font-weight:700; letter-spacing:-.02em; margin-bottom:4px; }
+  .stat-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .chart-box {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; padding:24px; margin-bottom:20px;
+  }
+  .chart-box h3 {
+    font-size:12px; font-weight:600; text-transform:uppercase;
+    letter-spacing:.08em; color:var(--muted); margin-bottom:16px;
+  }
+  .heat-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .heat-cell { aspect-ratio:1; border-radius:2px; }
+  .h0 { background:var(--faint); }
+  .h1 { background:rgba(99,102,241,.2); }
+  .h2 { background:rgba(99,102,241,.45); }
+  .h3 { background:rgba(99,102,241,.7); }
+  .h4 { background:rgba(99,102,241,.9); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { background:var(--bg3); padding:10px 14px; text-align:left; font-weight:500; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
+  td { padding:12px 14px; border-bottom:1px solid var(--faint); }
+  tr:hover td { background:rgba(255,255,255,.01); }
+  @media (max-width:600px) {
+    .stat-num { font-size:26px; }
+    .stat-box { padding:16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../" style="font-weight:600;font-size:14px;color:var(--text);margin-right:20px;white-space:nowrap;">hashcards <span style="color:var(--muted);font-weight:400;">— Demo</span></a>
+    <a class="nl" href="index.html">Study</a>
+    <a class="nl" href="browse.html">Browse</a>
+    <a class="nl" href="stats.html">Stats</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <section class="hero" style="padding:56px 0 40px;border-bottom:1px solid var(--border);text-align:center;">
+    <div class="hero-badge"><span class="dot"></span>Interactive Demo</div>
+    <h1>Statistics <em>Dashboard</em></h1>
+    <p style="margin:0 auto;max-width:560px;">Sample data showing the learning analytics you get with the real app</p>
+  </section>
+
+  <!-- Stat cards -->
+  <section style="padding:32px 0;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div class="stat-box"><div class="stat-num" style="color:var(--c1);">10</div><div class="stat-label">Total Cards</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--c4);">3</div><div class="stat-label">Due Today</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--c3);">12</div><div class="stat-label">Reviewed Today</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--c2);">87%</div><div class="stat-label">Retention</div></div>
+    </div>
+  </section>
+
+  <!-- State breakdown chart -->
+  <section>
+    <div class="chart-box">
+      <h3>Collection by State</h3>
+      <div style="position:relative;height:160px;">
+        <canvas id="stateChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- Review heatmap -->
+  <section>
+    <div class="chart-box">
+      <h3>Review Activity (last 7 days)</h3>
+      <div class="heat-grid">
+        <script>
+          const heatVals = [2,0,3,1,4,0,2];
+          for (let i = 0; i < 7; i++) {
+            document.write(`<div class="heat-cell h${heatVals[i]}" title="Day ${i+1}: ${heatVals[i]*5} reviews"></div>`);
+          }
+        </script>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:12px;font-size:10px;color:var(--muted);">
+        <span>Less</span>
+        <div class="heat-cell h0" style="width:12px;height:12px;"></div>
+        <div class="heat-cell h1" style="width:12px;height:12px;"></div>
+        <div class="heat-cell h2" style="width:12px;height:12px;"></div>
+        <div class="heat-cell h3" style="width:12px;height:12px;"></div>
+        <div class="heat-cell h4" style="width:12px;height:12px;"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Per-deck table -->
+  <section style="margin-bottom:40px;">
+    <div class="chart-box">
+      <h3>Per-Deck Breakdown</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>Deck</th><th style="text-align:right;">Total</th><th style="text-align:right;">New</th><th style="text-align:right;">Learning</th><th style="text-align:right;">Review</th><th style="text-align:right;">Avg Diff</th><th style="text-align:right;">Lapses</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;color:var(--text);">algo/CS</td>
+              <td style="text-align:right;">4</td><td style="text-align:right;">0</td>
+              <td style="text-align:right;color:var(--c4);">1</td><td style="text-align:right;color:var(--c3);">3</td>
+              <td style="text-align:right;">4.2</td><td style="text-align:right;">0.2</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--text);">ml/ML</td>
+              <td style="text-align:right;">3</td><td style="text-align:right;">0</td>
+              <td style="text-align:right;color:var(--c4);">0</td><td style="text-align:right;color:var(--c3);">3</td>
+              <td style="text-align:right;">5.6</td><td style="text-align:right;">1.0</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:var(--text);">system/System</td>
+              <td style="text-align:right;">3</td><td style="text-align:right;">1</td>
+              <td style="text-align:right;color:var(--c4);">0</td><td style="text-align:right;color:var(--c3);">2</td>
+              <td style="text-align:right;">5.1</td><td style="text-align:right;">0.3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer" style="margin-top:0;">
+    <p><a href="https://github.com/1998x-stack/interview_hashcards" style="color:var(--muted);">github.com/1998x-stack/interview_hashcards</a></p>
+  </div>
+
+</div>
+
+<script>
+new Chart(document.getElementById('stateChart'), {
+  type: 'bar',
+  data: {
+    labels: ['New','Learning','Review','Relearning'],
+    datasets: [{ data: [1,1,7,1], backgroundColor: ['#6366f1','#f59e0b','#10b981','#ef4444'], borderRadius:4 }]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{
+      x:{ grid:{display:false}, ticks:{precision:0,color:'#475569'} },
+      y:{ grid:{display:false}, ticks:{color:'#94a3b8'} }
+    }
+  }
+});
+</script>
+</body>
+</html>

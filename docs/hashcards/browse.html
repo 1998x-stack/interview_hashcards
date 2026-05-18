@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Browse — hashcards Demo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>#</text></svg>">
+<link rel="stylesheet" href="../base-dark.css">
+<style>
+  :root { --c1:#6366F1; --c2:#8B5CF6; --c3:#10B981; --c4:#F59E0B; --c5:#EF4444; }
+  .hero h1 em { background:linear-gradient(90deg,var(--c1),var(--c2)); }
+  .card-item {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; margin-bottom:12px;
+    transition:border-color .2s;
+  }
+  .card-item:hover { border-color:var(--border2); }
+  .card-item-hdr {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; border-bottom:1px solid var(--border);
+    flex-wrap:wrap; gap:8px;
+  }
+  .card-item-body { padding:16px; }
+  .card-item-footer {
+    padding:8px 16px; border-top:1px solid var(--faint);
+    display:flex; gap:16px; flex-wrap:wrap; font-size:11px; color:var(--muted);
+  }
+  .badge-sm {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px; border-radius:999px;
+    font-size:10px; font-weight:600; letter-spacing:.04em; border:1px solid;
+  }
+  .badge-qa   { color:var(--c1); border-color:rgba(99,102,241,.3); }
+  .badge-cloze{ color:var(--c2); border-color:rgba(139,92,246,.3); }
+  .qa-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:4px; }
+  .qa-content { font-size:13px; line-height:1.6; color:var(--text); }
+  .qa-content.secondary { border-top:1px solid var(--faint); padding-top:10px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../" style="font-weight:600;font-size:14px;color:var(--text);margin-right:20px;white-space:nowrap;">hashcards <span style="color:var(--muted);font-weight:400;">— Demo</span></a>
+    <a class="nl" href="index.html">Study</a>
+    <a class="nl" href="browse.html">Browse</a>
+    <a class="nl" href="stats.html">Stats</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <section class="hero" style="padding:56px 0 40px;border-bottom:1px solid var(--border);text-align:center;">
+    <div class="hero-badge"><span class="dot"></span>Interactive Demo</div>
+    <h1>Browse <em>Collection</em></h1>
+    <p style="margin:0 auto;max-width:560px;">All sample cards across 3 decks — 10 cards total</p>
+  </section>
+
+  <section style="padding:32px 0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Cards</span>
+      <span style="font-size:13px;color:var(--muted);">10 cards</span>
+    </div>
+
+    <div id="card-list"></div>
+  </section>
+
+  <div class="footer" style="margin-top:40px;">
+    <p><a href="https://github.com/1998x-stack/interview_hashcards" style="color:var(--muted);">github.com/1998x-stack/interview_hashcards</a></p>
+  </div>
+
+</div>
+
+<script>
+const CARDS = [
+  { type:'qa', question:'What is time complexity of binary search?', answer:'O(log n) — the search space halves each iteration.', deck:'algo/CS', diff:4.2, reps:5, lapses:0, interval:14 },
+  { type:'qa', question:'Explain the difference between a stack and a queue.', answer:'Stack: LIFO (Last In First Out). Queue: FIFO (First In First Out).', deck:'algo/CS', diff:3.1, reps:3, lapses:1, interval:7 },
+  { type:'cloze', text:'The [B-tree] is a self-balancing tree data structure that maintains sorted data and allows searches, insertions, and deletions in logarithmic time.', deletions:['B-tree'], deck:'algo/CS', diff:6.8, reps:8, lapses:0, interval:30 },
+  { type:'cloze', text:'A [hash table] uses a [hash function] to map keys to buckets, achieving O(1) average lookup time.', deletions:['hash table','hash function'], deck:'algo/CS', diff:2.5, reps:2, lapses:0, interval:3 },
+  { type:'qa', question:'What is the bias-variance tradeoff in machine learning?', answer:'Bias: error from wrong assumptions (underfitting). Variance: error from sensitivity to training data (overfitting).', deck:'ml/ML', diff:7.2, reps:12, lapses:2, interval:45 },
+  { type:'qa', question:'What is gradient descent?', answer:'An optimization algorithm that iteratively adjusts model parameters in the direction of steepest descent of the loss function.', deck:'ml/ML', diff:4.5, reps:6, lapses:0, interval:21 },
+  { type:'cloze', text:'[ReLU] (Rectified Linear Unit) is defined as f(x) = max(0, x) and helps mitigate the [vanishing gradient] problem.', deletions:['ReLU','vanishing gradient'], deck:'ml/ML', diff:5.0, reps:4, lapses:1, interval:10 },
+  { type:'qa', question:'What is a deadlock in operating systems?', answer:'A situation where two or more processes are each waiting for the other to release a resource.', deck:'system/System', diff:3.8, reps:3, lapses:0, interval:8 },
+  { type:'cloze', text:'[Virtual memory] allows a program to use more memory than physically available by swapping pages between [RAM] and [disk].', deletions:['Virtual memory','RAM','disk'], deck:'system/System', diff:5.5, reps:7, lapses:1, interval:28 },
+  { type:'qa', question:'What is the CAP theorem?', answer:'In distributed systems, you can only guarantee two of: Consistency, Availability, and Partition tolerance.', deck:'system/System', diff:6.0, reps:5, lapses:0, interval:14 },
+];
+
+function e(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+const list = document.getElementById('card-list');
+CARDS.forEach(c => {
+  const isQA = c.type === 'qa';
+  let body = '';
+  if (isQA) {
+    body = `<div class="qa-label" style="color:var(--c1);">Question</div><div class="qa-content">${e(c.question)}</div>
+            <div class="qa-content secondary"><div class="qa-label" style="color:var(--c3);">Answer</div><div class="qa-content">${e(c.answer)}</div></div>`;
+  } else {
+    const revealed = c.deletions.reduce((t,d) => t.replace(`[${d}]`, `<strong style="color:var(--c3);">${e(d)}</strong>`), e(c.text));
+    body = `<div class="qa-label" style="color:var(--c2);">Cloze</div><div class="qa-content">${revealed}</div>`;
+  }
+
+  list.insertAdjacentHTML('beforeend', `
+    <div class="card-item">
+      <div class="card-item-hdr">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:12px;font-weight:500;color:var(--text);">${e(c.deck)}</span>
+          <span class="badge-sm ${isQA?'badge-qa':'badge-cloze'}">${isQA?'Q&A':'Cloze'}</span>
+        </div>
+        <span style="font-size:11px;color:var(--muted);">${c.reps} reviews</span>
+      </div>
+      <div class="card-item-body">${body}</div>
+      <div class="card-item-footer">
+        <span>Difficulty: <span style="color:var(--c4);">${c.diff.toFixed(1)}</span></span>
+        <span>Interval: <span style="color:var(--c3);">${c.interval}d</span></span>
+        <span>Lapses: <span style="color:var(--c5);">${c.lapses}</span></span>
+      </div>
+    </div>
+  `);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>hashcards — Live Demo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>#</text></svg>">
+<link rel="stylesheet" href="../base-dark.css">
+<style>
+  :root {
+    --c1:#6366F1; --c1d:#4338CA;
+    --c2:#8B5CF6; --c2d:#6D28D9;
+    --c3:#10B981; --c3d:#059669;
+    --c4:#F59E0B; --c4d:#D97706;
+    --c5:#EF4444; --c5d:#B91C1C;
+  }
+  .hero h1 em { background:linear-gradient(90deg,var(--c1),var(--c2)); }
+
+  /* Card container */
+  .card-shell {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:14px; overflow:hidden; margin-bottom:24px;
+    transition:border-color .2s;
+  }
+  .card-shell:hover { border-color:var(--border2); }
+  .card-hdr {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; border-bottom:1px solid var(--border);
+  }
+  .card-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:3px 10px; border-radius:999px;
+    font-size:11px; font-weight:600; letter-spacing:.04em;
+    border:1px solid;
+  }
+  .badge-qa   { color:var(--c1); border-color:rgba(99,102,241,.35); background:rgba(99,102,241,.06); }
+  .badge-cloze{ color:var(--c2); border-color:rgba(139,92,246,.35); background:rgba(139,92,246,.06); }
+  .card-meta { font-size:11px; color:var(--muted); display:flex; gap:16px; }
+  .card-body { padding:28px 24px; min-height:200px; }
+  .card-question { margin-bottom:20px; }
+  .card-question-label {
+    font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.1em; margin-bottom:8px;
+  }
+  .card-question-text {
+    font-size:22px; font-weight:600; line-height:1.5; color:var(--text);
+    letter-spacing:-.01em;
+  }
+  .card-answer {
+    border-top:1px solid var(--border); padding-top:20px; display:none;
+    animation:fadeUp .25s ease both;
+  }
+  .card-answer.visible { display:block; }
+  .card-answer-label {
+    font-size:10px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.1em; margin-bottom:8px; color:var(--c3);
+  }
+  .card-answer-text {
+    font-size:20px; font-weight:500; line-height:1.5; color:var(--text);
+  }
+
+  /* Action bar */
+  .action-bar { padding:16px 20px; border-top:1px solid var(--border); }
+  .btn-row { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+  .btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600;
+    border:1px solid; cursor:pointer; transition:all .15s;
+    font-family:var(--font);
+  }
+  .btn-show {
+    background:var(--c1d); border-color:var(--c1); color:#fff;
+  }
+  .btn-show:hover { background:var(--c1); }
+  .btn-show kbd {
+    background:rgba(255,255,255,.2); padding:2px 6px; border-radius:4px;
+    font-size:11px; font-family:var(--mono);
+  }
+
+  /* Rating grid */
+  .rating-grid { display:none; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .rating-grid.visible { display:grid; }
+  .rate-btn {
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:14px 10px; border-radius:10px; border:2px solid;
+    cursor:pointer; transition:all .15s; font-family:var(--font);
+    background:transparent;
+  }
+  .rate-btn:hover { transform:translateY(-1px); }
+  .rate-again { border-color:rgba(239,68,68,.35); color:var(--c5); }
+  .rate-again:hover { background:rgba(239,68,68,.08); border-color:var(--c5); }
+  .rate-hard  { border-color:rgba(245,158,11,.35); color:var(--c4); }
+  .rate-hard:hover  { background:rgba(245,158,11,.08); border-color:var(--c4); }
+  .rate-good  { border-color:rgba(16,185,129,.35); color:var(--c3); }
+  .rate-good:hover  { background:rgba(16,185,129,.08); border-color:var(--c3); }
+  .rate-easy  { border-color:rgba(99,102,241,.35); color:var(--c1); }
+  .rate-easy:hover  { background:rgba(99,102,241,.08); border-color:var(--c1); }
+  .rate-label { font-size:14px; font-weight:700; }
+  .rate-hint { font-size:11px; display:flex; align-items:center; gap:4px; }
+  .rate-hint kbd {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:4px; font-size:11px;
+    font-family:var(--mono); font-weight:600;
+  }
+
+  /* Cloze */
+  .cloze-hidden {
+    display:inline-block; padding:2px 8px; border-radius:5px;
+    font-weight:600; font-size:20px;
+    background:rgba(245,158,11,.15); color:var(--c4);
+  }
+  .cloze-revealed {
+    display:inline-block; padding:2px 8px; border-radius:5px;
+    font-weight:600; font-size:20px;
+    background:rgba(16,185,129,.15); color:var(--c3);
+    animation:reveal .2s ease both;
+  }
+  @keyframes reveal {
+    from { opacity:0; transform:scale(.95); }
+    to   { opacity:1; transform:scale(1); }
+  }
+
+  /* Card nav */
+  .card-nav {
+    display:flex; align-items:center; justify-content:center;
+    gap:8px; margin-top:20px;
+  }
+  .card-nav button {
+    padding:6px 14px; border-radius:8px; border:1px solid var(--border);
+    background:var(--bg2); color:var(--muted); cursor:pointer;
+    font-size:12px; font-family:var(--font); transition:all .15s;
+  }
+  .card-nav button:hover { border-color:var(--border2); color:var(--text); }
+  .card-nav .card-counter { font-size:13px; color:var(--muted); min-width:60px; text-align:center; }
+
+  /* Keyboard hint */
+  .kbd-hint { text-align:center; padding:16px 0 0; font-size:11px; color:var(--faint); }
+  .kbd-hint kbd {
+    display:inline-block; padding:1px 6px; border-radius:4px;
+    border:1px solid var(--border); font-family:var(--mono); font-size:10px;
+  }
+
+  /* Toast */
+  .toast {
+    position:fixed; top:68px; left:50%; transform:translateX(-50%);
+    padding:8px 20px; border-radius:8px; font-size:13px; font-weight:600;
+    background:var(--c3d); color:#fff; z-index:200;
+    opacity:0; transition:opacity .3s;
+    pointer-events:none;
+  }
+  .toast.show { opacity:1; }
+
+  @media (max-width:600px) {
+    .rating-grid { grid-template-columns:repeat(2,1fr); }
+    .card-question-text { font-size:18px; }
+    .card-answer-text { font-size:17px; }
+    .card-body { padding:20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../" style="font-weight:600;font-size:14px;color:var(--text);margin-right:20px;white-space:nowrap;">hashcards <span style="color:var(--muted);font-weight:400;">— Demo</span></a>
+    <a class="nl" href="study.html">Study</a>
+    <a class="nl" href="browse.html">Browse</a>
+    <a class="nl" href="stats.html">Stats</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <section class="hero" style="padding:56px 0 40px;border-bottom:1px solid var(--border);text-align:center;">
+    <div class="hero-badge"><span class="dot"></span>Interactive Demo · Static Preview</div>
+    <h1>Study <em>Session</em></h1>
+    <p style="margin:0 auto 8px;max-width:600px;">
+      This is a static demo of the hashcards study interface. The real app is a Flask server
+      with FSRS scheduling. Clone and run locally for the full experience.
+    </p>
+    <div class="tag-row" style="justify-content:center;">
+      <span class="ltag" style="color:var(--c1);border-color:rgba(99,102,241,.35);">Space → Reveal</span>
+      <span class="ltag" style="color:var(--c3);border-color:rgba(16,185,129,.35);">1-4 → Rate</span>
+      <span class="ltag" style="color:var(--c2);border-color:rgba(139,92,246,.35);">← → Navigate</span>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Deck selector -->
+  <section style="padding:32px 0 24px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Decks</span>
+      <button onclick="selectDeck('all')" class="deck-btn active" data-deck="all"
+        style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;">All</button>
+      <button onclick="selectDeck('CS')" class="deck-btn" data-deck="CS"
+        style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;">algo/CS</button>
+      <button onclick="selectDeck('ML')" class="deck-btn" data-deck="ML"
+        style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;">ml/ML</button>
+      <button onclick="selectDeck('System')" class="deck-btn" data-deck="System"
+        style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;">system/System</button>
+    </div>
+  </section>
+
+  <!-- Card -->
+  <div class="card-shell" id="card-shell">
+    <div class="card-hdr">
+      <span class="card-badge badge-qa" id="card-badge">Q&A</span>
+      <span class="card-meta">
+        <span id="deck-label">algo/CS</span>
+        <span id="card-progress">Card 1/4</span>
+      </span>
+    </div>
+    <div class="card-body" id="card-body">
+      <!-- Filled by JS -->
+    </div>
+    <div class="action-bar">
+      <div class="btn-row" id="btn-row">
+        <button class="btn btn-show" onclick="showAnswer()" id="show-btn">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41Z" clip-rule="evenodd"/></svg>
+          Show answer <kbd>Space</kbd>
+        </button>
+        <div class="rating-grid" id="rating-grid">
+          <button class="rate-btn rate-again" onclick="rate(1)"><span class="rate-label">Again</span><span class="rate-hint"><kbd style="background:rgba(239,68,68,.15);">1</kbd> &lt;10m</span></button>
+          <button class="rate-btn rate-hard"  onclick="rate(2)"><span class="rate-label">Hard</span><span class="rate-hint"><kbd style="background:rgba(245,158,11,.15);">2</kbd> 3d</span></button>
+          <button class="rate-btn rate-good"  onclick="rate(3)"><span class="rate-label">Good</span><span class="rate-hint"><kbd style="background:rgba(16,185,129,.15);">3</kbd> 7d</span></button>
+          <button class="rate-btn rate-easy"  onclick="rate(4)"><span class="rate-label">Easy</span><span class="rate-hint"><kbd style="background:rgba(99,102,241,.15);">4</kbd> 14d</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card nav -->
+  <div class="card-nav">
+    <button onclick="prevCard()" id="prev-btn">← Prev</button>
+    <span class="card-counter" id="nav-counter">1 / 10</span>
+    <button onclick="nextCard()" id="next-btn">Next →</button>
+  </div>
+
+  <div class="kbd-hint">
+    Press <kbd>Space</kbd> to reveal · then <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> to rate · <kbd>←</kbd> <kbd>→</kbd> to navigate
+  </div>
+
+  <div class="footer" style="margin-top:40px;">
+    <p style="margin-bottom:8px;"><strong>hashcards Demo</strong> — Static preview of the study interface</p>
+    <p><a href="https://github.com/1998x-stack/interview_hashcards" style="color:var(--muted);">github.com/1998x-stack/interview_hashcards</a></p>
+  </div>
+
+</div>
+
+<script>
+const CARDS = [
+  { type:'qa', question:'What is time complexity of binary search?', answer:'O(log n) — the search space halves each iteration.', deck:'algo/CS', diff:4.2, reps:5, lapses:0, interval:14 },
+  { type:'qa', question:'Explain the difference between a stack and a queue.', answer:'Stack: LIFO (Last In First Out). Queue: FIFO (First In First Out).', deck:'algo/CS', diff:3.1, reps:3, lapses:1, interval:7 },
+  { type:'cloze', text:'The [B-tree] is a self-balancing tree data structure that maintains sorted data and allows searches, insertions, and deletions in logarithmic time.', deletions:['B-tree'], deck:'algo/CS', diff:6.8, reps:8, lapses:0, interval:30 },
+  { type:'cloze', text:'A [hash table] uses a [hash function] to map keys to buckets, achieving O(1) average lookup time.', deletions:['hash table','hash function'], deck:'algo/CS', diff:2.5, reps:2, lapses:0, interval:3 },
+  { type:'qa', question:'What is the bias-variance tradeoff in machine learning?', answer:'Bias: error from wrong assumptions (underfitting). Variance: error from sensitivity to training data (overfitting). The tradeoff balances both for optimal generalization.', deck:'ml/ML', diff:7.2, reps:12, lapses:2, interval:45 },
+  { type:'qa', question:'What is gradient descent?', answer:'An optimization algorithm that iteratively adjusts model parameters in the direction of steepest descent of the loss function.', deck:'ml/ML', diff:4.5, reps:6, lapses:0, interval:21 },
+  { type:'cloze', text:'[ReLU] (Rectified Linear Unit) is defined as f(x) = max(0, x) and helps mitigate the [vanishing gradient] problem.', deletions:['ReLU','vanishing gradient'], deck:'ml/ML', diff:5.0, reps:4, lapses:1, interval:10 },
+  { type:'qa', question:'What is a deadlock in operating systems?', answer:'A situation where two or more processes are each waiting for the other to release a resource, causing all to stall indefinitely.', deck:'system/System', diff:3.8, reps:3, lapses:0, interval:8 },
+  { type:'cloze', text:'[Virtual memory] allows a program to use more memory than physically available by swapping pages between [RAM] and [disk].', deletions:['Virtual memory','RAM','disk'], deck:'system/System', diff:5.5, reps:7, lapses:1, interval:28 },
+  { type:'qa', question:'What is the CAP theorem?', answer:'In distributed systems, you can only guarantee two of: Consistency, Availability, and Partition tolerance.', deck:'system/System', diff:6.0, reps:5, lapses:0, interval:14 },
+];
+
+let currentDeck = 'all';
+let currentIndex = 0;
+let answerShown = false;
+let filteredCards = [...CARDS];
+
+function getFilteredCards() {
+  if (currentDeck === 'all') return [...CARDS];
+  return CARDS.filter(c => c.deck.startsWith(currentDeck));
+}
+
+function selectDeck(deck) {
+  currentDeck = deck;
+  currentIndex = 0;
+  answerShown = false;
+  filteredCards = getFilteredCards();
+  document.querySelectorAll('.deck-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.deck === deck);
+    b.style.color = b.dataset.deck === deck ? 'var(--text)' : 'var(--muted)';
+    b.style.background = b.dataset.deck === deck ? 'var(--bg3)' : 'var(--bg2)';
+  });
+  renderCard();
+}
+
+function renderCard() {
+  if (filteredCards.length === 0) {
+    document.getElementById('card-body').innerHTML = '<div style="text-align:center;padding:60px 20px;"><p style="font-size:16px;color:var(--text);margin-bottom:8px;">No cards in this deck</p><p style="font-size:13px;color:var(--muted);">Try another deck or add more cards.</p></div>';
+    document.getElementById('btn-row').style.display = 'none';
+    document.getElementById('card-progress').textContent = '0 cards';
+    return;
+  }
+  if (currentIndex >= filteredCards.length) currentIndex = 0;
+  if (currentIndex < 0) currentIndex = filteredCards.length - 1;
+
+  answerShown = false;
+  const card = filteredCards[currentIndex];
+  document.getElementById('btn-row').style.display = 'flex';
+  document.getElementById('show-btn').style.display = '';
+  document.getElementById('rating-grid').classList.remove('visible');
+
+  // Update header
+  document.getElementById('deck-label').textContent = card.deck;
+  document.getElementById('card-progress').textContent = `Card ${currentIndex+1}/${filteredCards.length}`;
+
+  const badge = document.getElementById('card-badge');
+  badge.textContent = card.type === 'qa' ? 'Q&A' : 'Cloze';
+  badge.className = 'card-badge ' + (card.type === 'qa' ? 'badge-qa' : 'badge-cloze');
+
+  // Render card body
+  let html = '';
+  if (card.type === 'qa') {
+    html = `<div class="card-question">
+      <div class="card-question-label" style="color:var(--c1);">Question</div>
+      <div class="card-question-text">${escapeHtml(card.question)}</div>
+    </div>
+    <div class="card-answer" id="answer-section">
+      <div class="card-answer-label">Answer</div>
+      <div class="card-answer-text">${escapeHtml(card.answer)}</div>
+    </div>`;
+  } else {
+    const hiddenText = card.deletions.reduce((t, d) => t.replace(`[${d}]`, '<span class="cloze-hidden">[...]</span>'), escapeHtml(card.text));
+    const revealedText = card.deletions.reduce((t, d) => t.replace(`[${d}]`, `<span class="cloze-revealed">${escapeHtml(d)}</span>`), escapeHtml(card.text));
+    html = `<div class="card-question">
+      <div class="card-question-label" style="color:var(--c2);">Fill in the blank</div>
+      <div class="card-question-text" id="cloze-hidden">${hiddenText}</div>
+    </div>
+    <div class="card-answer" id="answer-section">
+      <div class="card-answer-label">Revealed</div>
+      <div class="card-answer-text">${revealedText}</div>
+    </div>`;
+  }
+  document.getElementById('card-body').innerHTML = html;
+
+  // Update nav
+  document.getElementById('nav-counter').textContent = `${currentIndex+1} / ${filteredCards.length}`;
+  document.getElementById('prev-btn').style.opacity = filteredCards.length <= 1 ? '0.3' : '1';
+  document.getElementById('next-btn').style.opacity = filteredCards.length <= 1 ? '0.3' : '1';
+}
+
+function showAnswer() {
+  if (filteredCards.length === 0) return;
+  answerShown = true;
+  document.getElementById('show-btn').style.display = 'none';
+  document.getElementById('rating-grid').classList.add('visible');
+  document.getElementById('answer-section').classList.add('visible');
+}
+
+function rate(rating) {
+  if (!answerShown) return;
+  const labels = {1:'Again',2:'Hard',3:'Good',4:'Easy'};
+  showToast(`Rated: ${labels[rating]}`);
+  currentIndex++;
+  if (currentIndex >= filteredCards.length) {
+    currentIndex = 0;
+    showToast('Deck complete! Starting over.');
+  }
+  answerShown = false;
+  renderCard();
+}
+
+function prevCard() {
+  if (filteredCards.length <= 1) return;
+  currentIndex = (currentIndex - 1 + filteredCards.length) % filteredCards.length;
+  answerShown = false;
+  renderCard();
+}
+
+function nextCard() {
+  if (filteredCards.length <= 1) return;
+  currentIndex = (currentIndex + 1) % filteredCards.length;
+  answerShown = false;
+  renderCard();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 1500);
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') { e.preventDefault(); if (!answerShown) showAnswer(); }
+  else if (answerShown && e.code === 'Digit1') rate(1);
+  else if (answerShown && e.code === 'Digit2') rate(2);
+  else if (answerShown && e.code === 'Digit3') rate(3);
+  else if (answerShown && e.code === 'Digit4') rate(4);
+  else if (e.code === 'ArrowRight') nextCard();
+  else if (e.code === 'ArrowLeft') prevCard();
+});
+
+renderCard();
+</script>
+</body>
+</html>
