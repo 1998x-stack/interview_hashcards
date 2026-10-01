@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd:new-project)",
+      "Skill(gsd:map-codebase)",
+      "Bash(wc -l /Users/mx/Desktop/series/项目系列/hashcards_sonnet/.planning/codebase/*.md)",
+      "Bash(grep -E '\\(sk-[a-zA-Z0-9]{20,}|sk_live_[a-zA-Z0-9]+|sk_test_[a-zA-Z0-9]+|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|glpat-[a-zA-Z0-9_-]+|AKIA[A-Z0-9]{16}|xox[baprs]-[a-zA-Z0-9-]+|-----BEGIN.*PRIVATE KEY|eyJ[a-zA-Z0-9_-]+\\\\.eyJ[a-zA-Z0-9_-]+\\\\.\\)' /Users/mx/Desktop/series/项目系列/hashcards_sonnet/.planning/codebase/*.md)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"feat: redesign UI with Tailwind CSS + Inter font:*)",
+      "Bash(bash \"/Users/mx/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/start-server.sh\" --project-dir /Users/mx/Desktop/series/项目系列/hashcards_sonnet 2>&1)",
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(pip install:*)",
+      "Bash(git push:*)",
+      "Bash(open http://localhost:5001)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5001/)",
+      "Bash(pkill -f \"HashcardsApp.*5001\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:5001/study/algo/01-papers/02-Transformer/02-Transformer\")",
+      "Read(//Users/mx/.claude/**)"
+    ]
+  }
+}
